@@ -1,1 +1,5 @@
-# base_auth
+# OS_ARCOND
+
+Flyway
+Lombok
+ModelMapper
