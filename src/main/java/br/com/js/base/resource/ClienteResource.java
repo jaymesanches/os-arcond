@@ -1,6 +1,5 @@
 package br.com.js.base.resource;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.js.base.dto.ClienteDTO;
+import br.com.js.base.dto.EnderecoDTO;
 import br.com.js.base.event.RecursoCriadoEvent;
 import br.com.js.base.model.Cliente;
+import br.com.js.base.model.Endereco;
 import br.com.js.base.service.CadastroClienteService;
 
 @RestController
@@ -42,7 +43,7 @@ public class ClienteResource {
 	@GetMapping
 	public List<ClienteDTO> listar() {
 		var clientes = cadastroClienteService.findAll();
-		return toListDTO(clientes);
+		return toClientesDTO(clientes);
 	}
 
 	@GetMapping("/{id}")
@@ -52,7 +53,7 @@ public class ClienteResource {
 		if (cliente == null) {
 			return ResponseEntity.notFound().build();
 		} else {
-			return ResponseEntity.ok(toDTO(cliente));
+			return ResponseEntity.ok(toClienteDTO(cliente));
 		}
 	}
 
@@ -60,37 +61,52 @@ public class ClienteResource {
 	public ResponseEntity<List<ClienteDTO>> buscarPeloNome(
 			@RequestParam(required = false, defaultValue = "%") String nome) {
 		var clientes = cadastroClienteService.findByNome(nome);
-		return ResponseEntity.ok(toListDTO(clientes));
+		return ResponseEntity.ok(toClientesDTO(clientes));
 	}
 
 	@PostMapping
 	public ResponseEntity<Cliente> salvar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
 		var cliente = toEntity(clienteDTO);
-		cliente.setDtaCadastro(OffsetDateTime.now());
+//		cliente.setDataCadastro(OffsetDateTime.now());
 		var clienteSalvo = cadastroClienteService.save(cliente);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, clienteSalvo.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
 	}
-	
+
 	@PutMapping
 	public ResponseEntity<Cliente> alterar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
 		var clienteAlterado = cadastroClienteService.save(toEntity(clienteDTO));
 		return ResponseEntity.ok(clienteAlterado);
 	}
 
-	private ClienteDTO toDTO(Cliente cliente) {
+	@GetMapping("/{idCliente}/enderecos")
+	public List<EnderecoDTO> pesquisarEnderecos(@PathVariable Long idCliente){
+		var cliente = cadastroClienteService.findById(idCliente);
+		return toEnderecosDTO(cliente.getEnderecos());
+	}
+
+	private ClienteDTO toClienteDTO(Cliente cliente) {
 		return modelMapper.map(cliente, ClienteDTO.class);
 	}
 
-	private List<ClienteDTO> toListDTO(List<Cliente> clientes) {
-		return clientes.stream().map(cliente -> toDTO(cliente)).collect(Collectors.toList());
+	private List<ClienteDTO> toClientesDTO(List<Cliente> clientes) {
+		return clientes.stream().map(cliente -> toClienteDTO(cliente)).collect(Collectors.toList());
 	}
-	
+
 	private Cliente toEntity(ClienteDTO clienteDTO) {
 		return modelMapper.map(clienteDTO, Cliente.class);
 	}
-	
+
+	@SuppressWarnings("unused")
 	private List<Cliente> toListEntity(List<ClienteDTO> lista) {
 		return lista.stream().map(dto -> toEntity(dto)).collect(Collectors.toList());
+	}
+
+	private List<EnderecoDTO> toEnderecosDTO(List<Endereco> enderecos) {
+		return enderecos.stream().map(dto -> toEnderecoDTO(dto)).collect(Collectors.toList());
+	}
+
+	private EnderecoDTO toEnderecoDTO(Endereco endereco) {
+		return modelMapper.map(endereco, EnderecoDTO.class);
 	}
 }

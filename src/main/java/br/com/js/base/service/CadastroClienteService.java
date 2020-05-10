@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.js.base.exception.BusinessException;
 import br.com.js.base.model.Cliente;
 import br.com.js.base.repository.ClienteRepository;
 
@@ -25,6 +26,10 @@ public class CadastroClienteService {
 	}
 
 	public List<Cliente> findByNome(String nome) {
+		if(nome == null) {
+			throw new BusinessException("Nome precisa ser preenchido");
+		}
+		
 		return clienteRepository.findByNomeIgnoringCaseContaining(nome);
 	}
 

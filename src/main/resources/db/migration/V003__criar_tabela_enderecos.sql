@@ -9,7 +9,7 @@ CREATE TABLE endereco (
 	unidade VARCHAR(50) NOT NULL,
 	ibge VARCHAR(20),
 	gia VARCHAR(20),
-	id_cliente INTEGER,
+	id_cliente BIGINT NOT NULL,
 	
 	FOREIGN KEY (id_cliente) REFERENCES cliente(id)
 );
