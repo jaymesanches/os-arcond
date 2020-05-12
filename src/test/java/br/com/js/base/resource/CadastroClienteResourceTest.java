@@ -16,6 +16,7 @@ import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,26 +49,26 @@ public class CadastroClienteResourceTest extends BaseResourceTest {
 
 	@MockBean
 	CadastroClienteService service;
-	
+
 	protected String obtainAccessToken() throws Exception {
 		return obtainAccessToken("admin@admin.com", "senhas");
 	}
 
 	private String obtainAccessToken(String username, String password) throws Exception {
-	
+
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("grant_type", "password");
 		params.add("client", "angular");
 		params.add("username", username);
 		params.add("password", password);
-	
+
 		ResultActions result = mvc
 				.perform(post("/oauth/token").params(params).with(httpBasic("angular", "@ngul@r0"))
 						.accept("application/json;charset=UTF-8"))
 				.andExpect(status().isOk()).andExpect(content().contentType("application/json;charset=UTF-8"));
-	
+
 		String resultString = result.andReturn().getResponse().getContentAsString();
-	
+
 		JacksonJsonParser jsonParser = new JacksonJsonParser();
 		return jsonParser.parseMap(resultString).get("access_token").toString();
 	}
@@ -152,13 +153,58 @@ public class CadastroClienteResourceTest extends BaseResourceTest {
 		// @formatter:on
 	}
 
+	@Test
+	@DisplayName("Deve deletar um cliente existente")
+	public void deve_deletar_um_cliente() throws Exception {
+		String accessToken = obtainAccessToken();
+
+		// Cenário
+		Long id = 123l;
+		BDDMockito.given(service.findById(Mockito.anyLong())).willReturn(Cliente.builder().id(id).build());
+
+		// Execução
+
+		// @formatter:off
+		MockHttpServletRequestBuilder request = 
+			MockMvcRequestBuilders
+			.delete(URL_API + "/1")
+			.header("Authorization", "Bearer " + accessToken)
+			.contentType(MediaType.APPLICATION_JSON)
+			.accept(MediaType.APPLICATION_JSON);
+
+		mvc
+			.perform(request)
+			.andExpect(status().isNoContent());
+
+		// @formatter:on
+	}
+
+	@Test
+	@DisplayName("Deve retornar not found ao deletar um cliente inexistente")
+	public void deve_retornar_not_found_ao_deletar_um_cliente_inexistente() throws Exception {
+		var accessToken = obtainAccessToken();
+
+		// Cenário
+//		Todos funcionam :)
+//		BDDMockito.given(service.findById(Mockito.anyLong())).willThrow(new ResourceNotFoundException());
+//		BDDMockito.given(service.findById(Mockito.anyLong())).willReturn(null);
+//		var mock = Mockito.mock(CadastroClienteService.class); // = @MockBean
+//		Mockito.doNothing().when(service).delete(Mockito.anyLong());
+		Mockito.doThrow(new ResourceNotFoundException()).when(service).delete(Mockito.anyLong());
+		
+		// Execução
+		var request = MockMvcRequestBuilders.delete(URL_API + "/1").header("Authorization", "Bearer " + accessToken);
+
+		mvc.perform(request).andExpect(status().isNotFound());
+	}
+
 	private String toJson(ClienteDTO dto) throws JsonProcessingException {
-		ObjectMapper objectMapper = new ObjectMapper();
+		var objectMapper = new ObjectMapper();
 		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		String json = objectMapper.writeValueAsString(dto);
+		var json = objectMapper.writeValueAsString(dto);
 		return json;
 	}
-	
+
 	private ClienteDTO novoClienteDTO() {
 		// @formatter:off
 		var dto = ClienteDTO.builder()
@@ -183,3 +229,9 @@ public class CadastroClienteResourceTest extends BaseResourceTest {
 		// @formatter:on
 	}
 }
+
+//Cenário
+
+//Execução
+
+//Verificação

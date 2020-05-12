@@ -8,5 +8,6 @@ import br.com.js.base.model.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 	public List<Cliente> findByNomeIgnoringCaseContaining(String nome);
+	public boolean existsByNomeIgnoringCaseContaining(String nome);
 
 }

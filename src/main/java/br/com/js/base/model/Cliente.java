@@ -45,4 +45,8 @@ public class Cliente {
 
 	@OneToMany
 	private List<Endereco> enderecos;
+
+	public static int compareByName(Cliente o1, Cliente o2) {
+		return o1.nome.compareTo(o2.nome);
+	}
 }
