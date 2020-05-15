@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.js.base.dto.ProdutoDTO;
 import br.com.js.base.event.RecursoCriadoEvent;
 import br.com.js.base.model.Produto;
-import br.com.js.base.service.CadastroProdutoService;
+import br.com.js.base.service.ProdutoService;
 
 @RestController
 @RequestMapping("/produtos")
@@ -37,7 +37,7 @@ public class ProdutoResource {
 	private ModelMapper modelMapper;
 
 	@Autowired
-	private CadastroProdutoService cadastroProdutoService;
+	private ProdutoService cadastroProdutoService;
 
 	@GetMapping
 	public List<ProdutoDTO> listar() {

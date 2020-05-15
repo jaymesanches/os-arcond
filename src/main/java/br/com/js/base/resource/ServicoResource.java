@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.js.base.dto.ServicoDTO;
 import br.com.js.base.event.RecursoCriadoEvent;
 import br.com.js.base.model.Servico;
-import br.com.js.base.service.CadastroServicoService;
+import br.com.js.base.service.ServicoService;
 
 @RestController
 @RequestMapping("/servicos")
@@ -34,7 +34,7 @@ public class ServicoResource {
 	private ModelMapper modelMapper;
 
 	@Autowired
-	private CadastroServicoService cadastroServicoService;
+	private ServicoService cadastroServicoService;
 
 	@GetMapping
 	public List<ServicoDTO> listar() {

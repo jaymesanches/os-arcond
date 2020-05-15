@@ -11,7 +11,7 @@ import br.com.js.base.model.Usuario;
 import br.com.js.base.repository.UsuarioRepository;
 
 @Service
-public class CadastroUsuarioService {
+public class UsuarioService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;

@@ -23,13 +23,13 @@ import br.com.js.base.repository.ProdutoRepository;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CadastroProdutoServiceTest {
+public class ProdutoServiceTest {
 
 	@Autowired
 	MockMvc mvc;
 
 	@Autowired
-	CadastroProdutoService service;
+	ProdutoService service;
 
 	@MockBean
 	ProdutoRepository repository;

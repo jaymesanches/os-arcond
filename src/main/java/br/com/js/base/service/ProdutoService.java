@@ -11,7 +11,7 @@ import br.com.js.base.model.Produto;
 import br.com.js.base.repository.ProdutoRepository;
 
 @Service
-public class CadastroProdutoService {
+public class ProdutoService {
 
 	@Autowired
 	private ProdutoRepository produtoRepository;

@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -28,26 +29,20 @@ import br.com.js.base.dto.EnderecoDTO;
 import br.com.js.base.event.RecursoCriadoEvent;
 import br.com.js.base.model.Cliente;
 import br.com.js.base.model.Endereco;
-import br.com.js.base.service.CadastroClienteService;
+import br.com.js.base.service.ClienteService;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteResource {
 
 	@Autowired
-	private CadastroClienteService cadastroClienteService;
+	private ClienteService cadastroClienteService;
 
 	@Autowired
 	private ApplicationEventPublisher publisher;
 
 	@Autowired
 	private ModelMapper modelMapper;
-
-	@GetMapping
-	public List<ClienteDTO> listar() {
-		var clientes = cadastroClienteService.findAll();
-		return toClientesDTO(clientes);
-	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ClienteDTO> buscarPeloCodigo(@PathVariable Long id) {
@@ -56,15 +51,15 @@ public class ClienteResource {
 		if (cliente == null) {
 			return ResponseEntity.notFound().build();
 		} else {
-			return ResponseEntity.ok(toClienteDTO(cliente));
+			return ResponseEntity.ok(toDTO(cliente));
 		}
 	}
 
-	@GetMapping("/search")
+	@GetMapping
 	public ResponseEntity<List<ClienteDTO>> buscarPeloNome(
 			@RequestParam(required = false, defaultValue = "%") String nome) {
-		var clientes = cadastroClienteService.findByNome(nome);
-		return ResponseEntity.ok(toClientesDTO(clientes));
+		var clientes = cadastroClienteService.findByNomeIgnoringCaseContaining(nome);
+		return ResponseEntity.ok(toListDTO(clientes));
 	}
 
 	@PostMapping
@@ -77,9 +72,13 @@ public class ClienteResource {
 	}
 
 	@PutMapping
-	public ResponseEntity<Cliente> alterar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
-		var clienteAlterado = cadastroClienteService.save(toEntity(clienteDTO));
-		return ResponseEntity.ok(clienteAlterado);
+	public ResponseEntity<ClienteDTO> alterar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
+		var cliente = toEntity(clienteDTO);
+		var clienteSalvo = cadastroClienteService.findById(cliente.getId());
+		BeanUtils.copyProperties(cliente, clienteSalvo);
+		var clienteAlterado = cadastroClienteService.update(clienteSalvo);
+		var dto = toDTO(clienteAlterado);
+		return ResponseEntity.ok(dto);
 	}
 
 	@GetMapping("/{idCliente}/enderecos")
@@ -97,12 +96,12 @@ public class ClienteResource {
 		cadastroClienteService.delete(id);
 	}
 
-	private ClienteDTO toClienteDTO(Cliente cliente) {
+	private ClienteDTO toDTO(Cliente cliente) {
 		return modelMapper.map(cliente, ClienteDTO.class);
 	}
 
-	private List<ClienteDTO> toClientesDTO(List<Cliente> clientes) {
-		return clientes.stream().map(cliente -> toClienteDTO(cliente)).collect(Collectors.toList());
+	private List<ClienteDTO> toListDTO(List<Cliente> clientes) {
+		return clientes.stream().map(cliente -> toDTO(cliente)).collect(Collectors.toList());
 	}
 
 	private Cliente toEntity(ClienteDTO clienteDTO) {

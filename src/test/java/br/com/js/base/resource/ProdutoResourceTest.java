@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,24 +33,24 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.com.js.base.dto.UsuarioDTO;
+import br.com.js.base.dto.ProdutoDTO;
 import br.com.js.base.exception.BusinessException;
-import br.com.js.base.model.Usuario;
-import br.com.js.base.service.CadastroUsuarioService;
+import br.com.js.base.model.Produto;
+import br.com.js.base.service.ProdutoService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CadastroUsuarioResourceTest {
+public class ProdutoResourceTest {
 
-	private final String URL_API = "/usuarios";
+	private final String URL_API = "/produtos";
 
 	// Simula as requisições http
 	@Autowired
 	MockMvc mvc;
 
 	@MockBean
-	CadastroUsuarioService service;
+	ProdutoService service;
 
 	private String obtainAccessToken() throws Exception {
 		return obtainAccessToken("admin@admin.com", "senhas");
@@ -73,8 +76,8 @@ public class CadastroUsuarioResourceTest {
 	}
 
 	@Test
-	@DisplayName("Deve listar todos os usuários")
-	public void deve_listar_todos_os_usuarios() throws Exception {
+	@DisplayName("Deve listar todos os produtos")
+	public void deve_listar_todos_os_produtos() throws Exception {
 		String accessToken = obtainAccessToken();
 
 		// @formatter:off
@@ -94,11 +97,11 @@ public class CadastroUsuarioResourceTest {
 	}
 
 	@Test
-	@DisplayName("Deve retornar erro ao criar um usuário sem nome")
-	public void deve_retornar_erro_ao_criar_usuario_sem_nome() throws Exception {
-		var dto = novoUsuarioDTO();
+	@DisplayName("Deve retornar erro ao criar um produto sem descrição")
+	public void deve_retornar_erro_ao_criar_produto_sem_descricao() throws Exception {
+		var dto = novoProdutoDTO();
 
-		BDDMockito.given(service.save(Mockito.any(Usuario.class)))
+		BDDMockito.given(service.save(Mockito.any(Produto.class)))
 				.willThrow(new BusinessException("Dados Incompletos"));
 
 		String json = toJson(dto);
@@ -126,11 +129,11 @@ public class CadastroUsuarioResourceTest {
 	public void deve_criar_um_novo_usuario() throws Exception {
 		String accessToken = obtainAccessToken();
 
-		var usuario = novoUsuario();
+		var usuario = novoProduto();
 		usuario.setId(10l);
-		var dto = novoUsuarioDTO();
+		var dto = novoProdutoDTO();
 
-		BDDMockito.given(service.save(Mockito.any(Usuario.class))).willReturn(usuario);
+		BDDMockito.given(service.save(Mockito.any(Produto.class))).willReturn(usuario);
 
 		String json = toJson(dto);
 
@@ -147,35 +150,86 @@ public class CadastroUsuarioResourceTest {
 			.perform(request)
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("id").isNotEmpty())
-			.andExpect(jsonPath("nome").value(dto.getNome()));
+			.andExpect(jsonPath("descricao").value(dto.getDescricao()));
 
 		// @formatter:on
 	}
 
-	private String toJson(UsuarioDTO dto) throws JsonProcessingException {
+	@Test
+	@DisplayName("Deve remover um produto")
+	public void deve_remover_um_produto() throws Exception {
+		String accessToken = obtainAccessToken();
+
+		Mockito.doNothing().when(service).delete(Mockito.anyLong());
+
+		// @formatter:off
+		MockHttpServletRequestBuilder request = 
+			MockMvcRequestBuilders
+			.delete(URL_API+"/10")
+			.header("Authorization", "Bearer " + accessToken)
+			.contentType(MediaType.APPLICATION_JSON)
+			.accept(MediaType.APPLICATION_JSON)
+			;
+
+		mvc
+			.perform(request)
+			.andExpect(status().isNoContent());
+
+		// @formatter:on
+	}
+	
+
+	@Test
+	@DisplayName("Deve retornar erro ao remover um produto inexistente")
+	public void deve_retornar_erro_ao_remover_produto_inexistente() throws Exception {
+		String accessToken = obtainAccessToken();
+
+		Mockito.doThrow(EmptyResultDataAccessException.class).when(service).delete(Mockito.anyLong());
+
+		// @formatter:off
+		MockHttpServletRequestBuilder request = 
+			MockMvcRequestBuilders
+			.delete(URL_API+"/10")
+			.header("Authorization", "Bearer " + accessToken)
+			.contentType(MediaType.APPLICATION_JSON)
+			.accept(MediaType.APPLICATION_JSON)
+			;
+
+		mvc
+			.perform(request)
+			.andExpect(status().isNotFound());
+
+		// @formatter:on
+	}
+
+	private String toJson(ProdutoDTO dto) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		String json = objectMapper.writeValueAsString(dto);
 		return json;
 	}
-	
-	private UsuarioDTO novoUsuarioDTO() {
+
+	private ProdutoDTO novoProdutoDTO() {
 		// @formatter:off
-		var dto = UsuarioDTO.builder()
-					.nome("Jayme Sanches")
-					.email("jayme@email.com")
-					.senha("55554433")
-					.build();
+		var dto = ProdutoDTO.builder()
+			.codigo("10")
+			.descricao("Filtro")
+			.precoCusto(BigDecimal.ONE)
+			.precoVenda(BigDecimal.TEN)
+			.estoque(10)
+			.build();
 		return dto;
 		// @formatter:on
 	}
 
-	private Usuario novoUsuario() {
+	private Produto novoProduto() {
 		// @formatter:off
-		var usuario = Usuario.builder()
-				.nome("Jayme Sanches")
-				.email("jayme@email.com")
-				.senha("55554433")
+		var usuario = Produto.builder()
+				.codigo("10")
+				.descricao("Filtro")
+				.precoCusto(BigDecimal.ONE)
+				.precoVenda(BigDecimal.TEN)
+				.estoque(10)
 				.build();
 		return usuario;
 		// @formatter:on

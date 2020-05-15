@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.js.base.dto.UsuarioDTO;
 import br.com.js.base.event.RecursoCriadoEvent;
 import br.com.js.base.model.Usuario;
-import br.com.js.base.service.CadastroUsuarioService;
+import br.com.js.base.service.UsuarioService;
 
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioResource {
 	
 	@Autowired
-	private CadastroUsuarioService cadastroUsuarioService;
+	private UsuarioService cadastroUsuarioService;
 	
 	@Autowired
 	private ApplicationEventPublisher publisher;

@@ -10,7 +10,7 @@ import br.com.js.base.model.Servico;
 import br.com.js.base.repository.ServicoRepository;
 
 @Service
-public class CadastroServicoService {
+public class ServicoService {
 
 	@Autowired
 	private ServicoRepository servicoRepository;

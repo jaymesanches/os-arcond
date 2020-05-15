@@ -21,13 +21,13 @@ import br.com.js.base.repository.UsuarioRepository;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CadastroUsuarioServiceTest {
+public class UsuarioServiceTest {
 
 	@Autowired
 	MockMvc mvc;
 
 	@Autowired
-	CadastroUsuarioService service;
+	UsuarioService service;
 
 	@MockBean
 	UsuarioRepository repository;

@@ -1,7 +1,10 @@
 package br.com.js.base.model;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,12 +37,12 @@ public class Cliente {
 
 	private String cpf;
 
-//	@Column(name = "data_nascimento")
-//	private LocalDate dataNascimento;
-//
-//	@Column(name = "data_cadastro")
-//	@Builder.Default
-//	private OffsetDateTime dataCadastro = OffsetDateTime.now();
+	@Column(name = "data_nascimento")
+	private LocalDate dataNascimento;
+
+	@Column(name = "data_cadastro")
+	@Builder.Default
+	private OffsetDateTime dataCadastro = OffsetDateTime.now();
 
 	private String telefone;
 

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import br.com.js.base.exception.BusinessException;
@@ -12,7 +11,7 @@ import br.com.js.base.model.Cliente;
 import br.com.js.base.repository.ClienteRepository;
 
 @Service
-public class CadastroClienteService {
+public class ClienteService {
 
 	@Autowired
 	private ClienteRepository clienteRepository;
@@ -26,11 +25,7 @@ public class CadastroClienteService {
 		return clienteOptional.orElse(null);
 	}
 
-	public List<Cliente> findByNome(String nome) {
-		if (nome == null) {
-			throw new BusinessException("Nome precisa ser preenchido");
-		}
-
+	public List<Cliente> findByNomeIgnoringCaseContaining(String nome) {
 		return clienteRepository.findByNomeIgnoringCaseContaining(nome);
 	}
 
@@ -39,6 +34,14 @@ public class CadastroClienteService {
 	}
 
 	public void delete(Long id) {
+		if (!clienteRepository.existsById(id)) {
+			throw new BusinessException("Cliente inexistente");
+		}
+
 		clienteRepository.deleteById(id);
+	}
+
+	public Cliente update(Cliente cliente) {
+		return clienteRepository.save(cliente);
 	}
 }

@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +16,6 @@ import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,24 +30,24 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.com.js.base.dto.ProdutoDTO;
+import br.com.js.base.dto.UsuarioDTO;
 import br.com.js.base.exception.BusinessException;
-import br.com.js.base.model.Produto;
-import br.com.js.base.service.CadastroProdutoService;
+import br.com.js.base.model.Usuario;
+import br.com.js.base.service.UsuarioService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CadastroProdutoResourceTest {
+public class UsuarioResourceTest {
 
-	private final String URL_API = "/produtos";
+	private final String URL_API = "/usuarios";
 
 	// Simula as requisições http
 	@Autowired
 	MockMvc mvc;
 
 	@MockBean
-	CadastroProdutoService service;
+	UsuarioService service;
 
 	private String obtainAccessToken() throws Exception {
 		return obtainAccessToken("admin@admin.com", "senhas");
@@ -76,8 +73,8 @@ public class CadastroProdutoResourceTest {
 	}
 
 	@Test
-	@DisplayName("Deve listar todos os produtos")
-	public void deve_listar_todos_os_produtos() throws Exception {
+	@DisplayName("Deve listar todos os usuários")
+	public void deve_listar_todos_os_usuarios() throws Exception {
 		String accessToken = obtainAccessToken();
 
 		// @formatter:off
@@ -97,11 +94,11 @@ public class CadastroProdutoResourceTest {
 	}
 
 	@Test
-	@DisplayName("Deve retornar erro ao criar um produto sem descrição")
-	public void deve_retornar_erro_ao_criar_produto_sem_descricao() throws Exception {
-		var dto = novoProdutoDTO();
+	@DisplayName("Deve retornar erro ao criar um usuário sem nome")
+	public void deve_retornar_erro_ao_criar_usuario_sem_nome() throws Exception {
+		var dto = novoUsuarioDTO();
 
-		BDDMockito.given(service.save(Mockito.any(Produto.class)))
+		BDDMockito.given(service.save(Mockito.any(Usuario.class)))
 				.willThrow(new BusinessException("Dados Incompletos"));
 
 		String json = toJson(dto);
@@ -129,11 +126,11 @@ public class CadastroProdutoResourceTest {
 	public void deve_criar_um_novo_usuario() throws Exception {
 		String accessToken = obtainAccessToken();
 
-		var usuario = novoProduto();
+		var usuario = novoUsuario();
 		usuario.setId(10l);
-		var dto = novoProdutoDTO();
+		var dto = novoUsuarioDTO();
 
-		BDDMockito.given(service.save(Mockito.any(Produto.class))).willReturn(usuario);
+		BDDMockito.given(service.save(Mockito.any(Usuario.class))).willReturn(usuario);
 
 		String json = toJson(dto);
 
@@ -150,86 +147,35 @@ public class CadastroProdutoResourceTest {
 			.perform(request)
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("id").isNotEmpty())
-			.andExpect(jsonPath("descricao").value(dto.getDescricao()));
+			.andExpect(jsonPath("nome").value(dto.getNome()));
 
 		// @formatter:on
 	}
 
-	@Test
-	@DisplayName("Deve remover um produto")
-	public void deve_remover_um_produto() throws Exception {
-		String accessToken = obtainAccessToken();
-
-		Mockito.doNothing().when(service).delete(Mockito.anyLong());
-
-		// @formatter:off
-		MockHttpServletRequestBuilder request = 
-			MockMvcRequestBuilders
-			.delete(URL_API+"/10")
-			.header("Authorization", "Bearer " + accessToken)
-			.contentType(MediaType.APPLICATION_JSON)
-			.accept(MediaType.APPLICATION_JSON)
-			;
-
-		mvc
-			.perform(request)
-			.andExpect(status().isNoContent());
-
-		// @formatter:on
-	}
-	
-
-	@Test
-	@DisplayName("Deve retornar erro ao remover um produto inexistente")
-	public void deve_retornar_erro_ao_remover_produto_inexistente() throws Exception {
-		String accessToken = obtainAccessToken();
-
-		Mockito.doThrow(EmptyResultDataAccessException.class).when(service).delete(Mockito.anyLong());
-
-		// @formatter:off
-		MockHttpServletRequestBuilder request = 
-			MockMvcRequestBuilders
-			.delete(URL_API+"/10")
-			.header("Authorization", "Bearer " + accessToken)
-			.contentType(MediaType.APPLICATION_JSON)
-			.accept(MediaType.APPLICATION_JSON)
-			;
-
-		mvc
-			.perform(request)
-			.andExpect(status().isNotFound());
-
-		// @formatter:on
-	}
-
-	private String toJson(ProdutoDTO dto) throws JsonProcessingException {
+	private String toJson(UsuarioDTO dto) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		String json = objectMapper.writeValueAsString(dto);
 		return json;
 	}
-
-	private ProdutoDTO novoProdutoDTO() {
+	
+	private UsuarioDTO novoUsuarioDTO() {
 		// @formatter:off
-		var dto = ProdutoDTO.builder()
-			.codigo("10")
-			.descricao("Filtro")
-			.precoCusto(BigDecimal.ONE)
-			.precoVenda(BigDecimal.TEN)
-			.estoque(10)
-			.build();
+		var dto = UsuarioDTO.builder()
+					.nome("Jayme Sanches")
+					.email("jayme@email.com")
+					.senha("55554433")
+					.build();
 		return dto;
 		// @formatter:on
 	}
 
-	private Produto novoProduto() {
+	private Usuario novoUsuario() {
 		// @formatter:off
-		var usuario = Produto.builder()
-				.codigo("10")
-				.descricao("Filtro")
-				.precoCusto(BigDecimal.ONE)
-				.precoVenda(BigDecimal.TEN)
-				.estoque(10)
+		var usuario = Usuario.builder()
+				.nome("Jayme Sanches")
+				.email("jayme@email.com")
+				.senha("55554433")
 				.build();
 		return usuario;
 		// @formatter:on

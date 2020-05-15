@@ -1,5 +1,7 @@
 package br.com.js.base.dto;
 
+import java.util.List;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -28,4 +30,6 @@ public class ClienteDTO {
 	
 	@NotBlank
 	private String telefone;
+	
+	private List<EnderecoDTO> enderecos;
 }

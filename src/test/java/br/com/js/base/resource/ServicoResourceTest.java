@@ -34,19 +34,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.js.base.dto.ServicoDTO;
 import br.com.js.base.exception.BusinessException;
 import br.com.js.base.model.Servico;
-import br.com.js.base.service.CadastroServicoService;
+import br.com.js.base.service.ServicoService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CadastroServicoResourceTest {
+public class ServicoResourceTest {
 	
 	// Simula as requisições http
 	@Autowired
 	MockMvc mvc;
 
 	@MockBean
-	CadastroServicoService service;
+	ServicoService service;
 	
 	private String obtainAccessToken() throws Exception {
 		return obtainAccessToken("admin@admin.com", "senhas");
