@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.ClienteDTO;
+import br.com.js.base.helper.ClienteTestHelper;
 import br.com.js.base.model.Cliente;
 import br.com.js.base.service.ClienteService;
 
@@ -72,8 +73,7 @@ public class ClienteResourceTest extends BaseResourceTest {
 	@DisplayName("Deve retornar erro ao criar um cliente sem nome")
 	public void deve_retornar_erro_ao_criar_cliente_sem_nome() throws Exception {
 		// @formatter:off
-		
-		var dto = novoClienteDTO();
+		var dto = ClienteTestHelper.getClienteDTO();
 		dto.setNome(null);
 
 		var json = toJson(dto);
@@ -100,8 +100,8 @@ public class ClienteResourceTest extends BaseResourceTest {
 	@Test
 	@DisplayName("Deve criar um novo cliente")
 	public void deve_criar_um_novo_cliente() throws Exception {
-		var cliente = umCliente();
-		var dto = novoClienteDTO();
+		var cliente = ClienteTestHelper.getCliente(1l);
+		var dto = ClienteTestHelper.getClienteDTO();
 
 		given(service.save(any(Cliente.class))).willReturn(cliente);
 
@@ -170,12 +170,12 @@ public class ClienteResourceTest extends BaseResourceTest {
 	@Test
 	@DisplayName("Deve retornar uma lista de clientes por nome")
 	public void deve_pesquisar_uma_lista_cliente_por_nome() throws Exception {
-		var cliente = novoCliente();
+		var cliente = ClienteTestHelper.getCliente();
 		var lista = new ArrayList<Cliente>();
 		lista.add(cliente);
 
 		// Cenário
-		given(service.findByNomeIgnoringCaseContaining(anyString())).willReturn(lista);
+		given(service.findByNomeIgnoreCaseContaining(anyString())).willReturn(lista);
 
 		// Execução
 		var request = MockMvcRequestBuilders.get(URL_API + "?nome=teste")
@@ -185,13 +185,15 @@ public class ClienteResourceTest extends BaseResourceTest {
 		mvc.perform(request).andExpect(status().isOk()).andExpect(jsonPath("$..nome").exists());
 	}
 
+	@Test
+	@DisplayName("Deve alterar um cliente")
 	public void deve_alterar_um_cliente() throws Exception {
 		// Cenário
-		var cliente = umCliente();
+		var cliente = ClienteTestHelper.getCliente(1l);
 		cliente.setNome("Nome Alterado");
 		given(service.update(any(Cliente.class))).willReturn(cliente);
 
-		var dto = umClienteDTO();
+		var dto = ClienteTestHelper.getClienteDTO(1l);
 
 		var json = toJson(dto);
 
@@ -200,7 +202,7 @@ public class ClienteResourceTest extends BaseResourceTest {
 		// @formatter:off
 		var request = 
 			MockMvcRequestBuilders
-			.put(URL_API + "/{id}", 1l)
+			.put(URL_API)
 			.header("Authorization", "Bearer " + accessToken)
 			.contentType(MediaType.APPLICATION_JSON)
 			.accept(MediaType.APPLICATION_JSON)
@@ -219,7 +221,7 @@ public class ClienteResourceTest extends BaseResourceTest {
 	@DisplayName("Deve buscar um cliente pelo código")
 	public void deve_buscar_um_cliente_pelo_codigo() throws Exception {
 		// Cenário
-		var cliente = umCliente();
+		var cliente = ClienteTestHelper.getCliente(1l);
 		given(service.findById(anyLong())).willReturn(cliente);
 
 		// Execução
@@ -244,55 +246,5 @@ public class ClienteResourceTest extends BaseResourceTest {
 		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		var json = objectMapper.writeValueAsString(dto);
 		return json;
-	}
-
-	private ClienteDTO novoClienteDTO() {
-		// @formatter:off
-		var dto = ClienteDTO.builder()
-					.nome("Jayme Sanches")
-					.cpf("12345678909")
-					.email("jayme@email.com")
-					.telefone("55554433")
-					.build();
-		return dto;
-		// @formatter:on
-	}
-
-	private ClienteDTO umClienteDTO() {
-		// @formatter:off
-		var dto = ClienteDTO.builder()
-					.id(1l)
-					.nome("Jayme Sanches")
-					.cpf("12345678909")
-					.email("jayme@email.com")
-					.telefone("55554433")
-					.build();
-		return dto;
-		// @formatter:on
-	}
-
-	private Cliente novoCliente() {
-		// @formatter:off
-		var cliente = Cliente.builder()
-				.nome("Jayme Sanches")
-				.cpf("12345678909")
-				.email("jayme@email.com")
-				.telefone("55554433")
-				.build();
-		return cliente;
-		// @formatter:on
-	}
-
-	private Cliente umCliente() {
-		// @formatter:off
-		var cliente = Cliente.builder()
-				.id(1l)
-				.nome("Jayme Sanches")
-				.cpf("12345678909")
-				.email("jayme@email.com")
-				.telefone("55554433")
-				.build();
-		return cliente;
-		// @formatter:on
 	}
 }

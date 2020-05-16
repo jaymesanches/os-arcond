@@ -3,7 +3,9 @@ package br.com.js.base.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import br.com.js.base.exception.BusinessException;
@@ -25,8 +27,8 @@ public class ClienteService {
 		return clienteOptional.orElse(null);
 	}
 
-	public List<Cliente> findByNomeIgnoringCaseContaining(String nome) {
-		return clienteRepository.findByNomeIgnoringCaseContaining(nome);
+	public List<Cliente> findByNomeIgnoreCaseContaining(String nome) {
+		return clienteRepository.findByNomeIgnoreCaseContaining(nome);
 	}
 
 	public Cliente save(Cliente cliente) {
@@ -42,6 +44,9 @@ public class ClienteService {
 	}
 
 	public Cliente update(Cliente cliente) {
-		return clienteRepository.save(cliente);
+		var clienteOptional = clienteRepository.findById(cliente.getId());
+		var clienteSalvo = clienteOptional.orElseThrow(() -> new ResourceNotFoundException("Cliente não existe"));
+		BeanUtils.copyProperties(cliente, clienteSalvo);
+		return clienteRepository.save(clienteSalvo);
 	}
 }

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import br.com.js.base.model.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
-	public List<Cliente> findByNomeIgnoringCaseContaining(String nome);
-	public boolean existsByNomeIgnoringCaseContaining(String nome);
+	public List<Cliente> findByNomeIgnoreCaseContaining(String nome);
+	public boolean existsByNomeIgnoreCaseContaining(String nome);
 }

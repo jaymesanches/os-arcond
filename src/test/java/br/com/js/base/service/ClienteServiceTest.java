@@ -5,10 +5,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -21,10 +21,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import br.com.js.base.exception.BusinessException;
+import br.com.js.base.helper.ClienteTestHelper;
 import br.com.js.base.model.Cliente;
 import br.com.js.base.repository.ClienteRepository;
 
@@ -47,7 +49,7 @@ public class ClienteServiceTest {
 	public void deve_pesquisar_todos_os_clientes() throws Exception {
 		// Cenário
 
-		var clientes = obterListaComDoisClientes();
+		var clientes = ClienteTestHelper.obterListaComDoisClientes();
 
 		when(repository.findAll()).thenReturn(clientes);
 
@@ -59,28 +61,10 @@ public class ClienteServiceTest {
 		assertThat(lista.size()).isEqualTo(2);
 	}
 
-	private ArrayList<Cliente> obterListaComDoisClientes() {
-		// @formatter:off
-		var cliente1 = Cliente.builder()
-			.nome("Jayme")
-			.cpf("12345678909")
-			.email("jayme@email.com")
-			.build();
-		// @formatter:on
-
-		var cliente2 = Cliente.builder().nome("Isabela").cpf("12345678909").email("isa@email.com").build();
-		// @formatter:on
-
-		var clientes = new ArrayList<Cliente>();
-		clientes.add(cliente1);
-		clientes.add(cliente2);
-		return clientes;
-	}
-
 	@Test
 	@DisplayName("Deve retornar um cliente pelo id")
 	public void deve_retornar_um_cliente_pelo_id() throws Exception {
-		var clienteOptional = Optional.of(novoCliente());
+		var clienteOptional = Optional.of(ClienteTestHelper.getCliente());
 		when(repository.findById(anyLong())).thenReturn((clienteOptional));
 
 		var cliente = service.findById(1l);
@@ -99,20 +83,21 @@ public class ClienteServiceTest {
 	@Test
 	@DisplayName("Deve retornar uma lista de clientes ao pesquisa por parte do nome")
 	public void deve_pesquisar_uma_lista_de_clientes_ao_pesquisar_por_parte_do_nome() throws Exception {
-		var clientes = obterListaComDoisClientes();
-		when(repository.findByNomeIgnoringCaseContaining(anyString())).thenReturn(clientes);
+		var clientes = ClienteTestHelper.obterListaComDoisClientes();
+		when(repository.findByNomeIgnoreCaseContaining(anyString())).thenReturn(clientes);
 
-		var lista = service.findByNomeIgnoringCaseContaining("ze");
+		var lista = service.findByNomeIgnoreCaseContaining("ze");
 		assertThat(lista.size()).isEqualTo(2);
 	}
 
 	@Test
 	@DisplayName("Deve salvar um cliente")
 	public void deve_salvar_um_cliente() {
-		// Cenário
-		var cliente = novoCliente();
-
 		// @formatter:off
+
+		// Cenário
+		var cliente = ClienteTestHelper.getCliente();
+
 		when(repository.save(cliente))
 			.thenReturn(Cliente.builder()
 				.id(10l)
@@ -120,7 +105,6 @@ public class ClienteServiceTest {
 				.cpf("12345678909")
 				.email("jayme@email.com")
 				.build());
-		// @formatter:on
 
 		// Execução
 		var clienteSalvo = service.save(cliente);
@@ -128,6 +112,8 @@ public class ClienteServiceTest {
 		// Verificação
 		assertThat(clienteSalvo.getId()).isNotNull();
 		assertThat(clienteSalvo.getNome()).isEqualTo("Jayme");
+		
+		// @formatter:on
 	}
 
 	@Test
@@ -153,7 +139,7 @@ public class ClienteServiceTest {
 	@DisplayName("Deve retornar erro ao criar um cliente com dados incompletos")
 	public void deve_retornar_erro_ao_criar_cliente_com_dados_incompletos() {
 		// Cenário
-		var cliente = novoCliente();
+		var cliente = ClienteTestHelper.getCliente();
 		cliente.setNome(null);
 
 		when(repository.save(cliente)).thenThrow(DataIntegrityViolationException.class);
@@ -168,7 +154,10 @@ public class ClienteServiceTest {
 	@Test
 	@DisplayName("Deve alterar um cliente")
 	public void deve_alterar_um_cliente() throws Exception {
-		var cliente = novoCliente();
+		var cliente = ClienteTestHelper.getCliente();
+		cliente.setId(1l);
+		var optional = Optional.of(cliente);
+		when(repository.findById(1l)).thenReturn(optional);
 		when(repository.save(Mockito.any(Cliente.class))).thenReturn(cliente);
 		
 		var clienteAlterado = service.update(cliente);
@@ -176,15 +165,16 @@ public class ClienteServiceTest {
 		assertThat(clienteAlterado.getNome().equals(cliente.getNome()));
 		verify(repository, Mockito.atLeastOnce()).save(cliente);
 	}
-
-	private Cliente novoCliente() {
-		// @formatter:off
-		return Cliente.builder()
-			.nome("Jayme")
-			.cpf("12345678909")
-//			.dataNascimento(LocalDate.parse("01/01/2020", DateTimeFormatter.ofPattern("dd/MM/yyyy")))
-			.email("jayme@email.com")
-			.build();
-		// @formatter:on
+	
+	@Test
+	@DisplayName("Deve retornar erro ao alterar um cliente não existente")
+	public void deve_retornar_erro_ao_tentar_alterar_um_cliente_nao_existente() throws Exception {
+		var cliente = ClienteTestHelper.getCliente();
+		when(repository.findById(anyLong())).thenThrow(new ResourceNotFoundException("Cliente não existe"));
+		
+		Throwable exception = Assertions.catchThrowable(() -> service.update(cliente));
+		
+		assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+		verify(repository, never()).save(cliente);
 	}
 }

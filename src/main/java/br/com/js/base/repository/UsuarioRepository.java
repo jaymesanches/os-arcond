@@ -9,7 +9,8 @@ import br.com.js.base.model.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	public Optional<Usuario> findByEmail(String email);
-	public List<Usuario> findByNomeIgnoringCaseContaining(String nome);
+	public List<Usuario> findByNomeIgnoreCaseContaining(String nome);
 	public List<Usuario> findByPermissoesDescricao(String permissaoDescricao);
+	public boolean existsByNomeIgnoreCaseContaining(String string);
 
 }

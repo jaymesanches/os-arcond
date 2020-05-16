@@ -1,32 +1,30 @@
 package br.com.js.base.resource;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -34,14 +32,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.ProdutoDTO;
-import br.com.js.base.exception.BusinessException;
+import br.com.js.base.helper.ProdutoTestHelper;
 import br.com.js.base.model.Produto;
 import br.com.js.base.service.ProdutoService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ProdutoResourceTest {
+public class ProdutoResourceTest extends BaseResourceTest {
 
 	private final String URL_API = "/produtos";
 
@@ -52,36 +50,18 @@ public class ProdutoResourceTest {
 	@MockBean
 	ProdutoService service;
 
-	private String obtainAccessToken() throws Exception {
-		return obtainAccessToken("admin@admin.com", "senhas");
-	}
+	private String accessToken;
 
-	private String obtainAccessToken(String username, String password) throws Exception {
-
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("grant_type", "password");
-		params.add("client", "angular");
-		params.add("username", username);
-		params.add("password", password);
-
-		ResultActions result = mvc
-				.perform(post("/oauth/token").params(params).with(httpBasic("angular", "@ngul@r0"))
-						.accept("application/json;charset=UTF-8"))
-				.andExpect(status().isOk()).andExpect(content().contentType("application/json;charset=UTF-8"));
-
-		String resultString = result.andReturn().getResponse().getContentAsString();
-
-		JacksonJsonParser jsonParser = new JacksonJsonParser();
-		return jsonParser.parseMap(resultString).get("access_token").toString();
+	@BeforeEach
+	public void setup() throws Exception {
+		accessToken = obtainAccessToken("admin@admin.com", "senhas");
 	}
 
 	@Test
 	@DisplayName("Deve listar todos os produtos")
 	public void deve_listar_todos_os_produtos() throws Exception {
-		String accessToken = obtainAccessToken();
-
 		// @formatter:off
-		MockHttpServletRequestBuilder request = 
+		var request = 
 			MockMvcRequestBuilders
 			.get(URL_API)
 			.header("Authorization", "Bearer " + accessToken)
@@ -92,24 +72,19 @@ public class ProdutoResourceTest {
 		mvc
 			.perform(request)
 			.andExpect(status().isOk());
-
 		// @formatter:on
 	}
 
 	@Test
 	@DisplayName("Deve retornar erro ao criar um produto sem descrição")
 	public void deve_retornar_erro_ao_criar_produto_sem_descricao() throws Exception {
-		var dto = novoProdutoDTO();
-
-		BDDMockito.given(service.save(Mockito.any(Produto.class)))
-				.willThrow(new BusinessException("Dados Incompletos"));
-
-		String json = toJson(dto);
-
-		String accessToken = obtainAccessToken();
-
 		// @formatter:off
-		MockHttpServletRequestBuilder request = 
+		var dto = ProdutoTestHelper.getProdutoDTO();
+		dto.setDescricao(null);
+
+		var json = toJson(dto);
+
+		var request = 
 			MockMvcRequestBuilders
 			.post(URL_API)
 			.header("Authorization", "Bearer " + accessToken)
@@ -117,28 +92,29 @@ public class ProdutoResourceTest {
 			.accept(MediaType.APPLICATION_JSON)
 			.content(json);
 
-		mvc
+		var result = mvc
 			.perform(request)
-			.andExpect(status().isBadRequest())			;
-
+			.andExpect(status().isBadRequest())			
+			.andReturn().getResolvedException()
+			;
+		
+		assertThat(result).isInstanceOf(MethodArgumentNotValidException.class);
+		
 		// @formatter:on
 	}
 
 	@Test
-	@DisplayName("Deve criar um novo usuário")
-	public void deve_criar_um_novo_usuario() throws Exception {
-		String accessToken = obtainAccessToken();
+	@DisplayName("Deve criar um novo produto")
+	public void deve_criar_um_novo_produto() throws Exception {
+		var produto = ProdutoTestHelper.getProduto(1l);
+		var dto = ProdutoTestHelper.getProdutoDTO();
 
-		var usuario = novoProduto();
-		usuario.setId(10l);
-		var dto = novoProdutoDTO();
+		given(service.save(any(Produto.class))).willReturn(produto);
 
-		BDDMockito.given(service.save(Mockito.any(Produto.class))).willReturn(usuario);
-
-		String json = toJson(dto);
+		var json = toJson(dto);
 
 		// @formatter:off
-		MockHttpServletRequestBuilder request = 
+		var request = 
 			MockMvcRequestBuilders
 			.post(URL_API)
 			.header("Authorization", "Bearer " + accessToken)
@@ -156,20 +132,21 @@ public class ProdutoResourceTest {
 	}
 
 	@Test
-	@DisplayName("Deve remover um produto")
-	public void deve_remover_um_produto() throws Exception {
-		String accessToken = obtainAccessToken();
+	@DisplayName("Deve deletar um produto existente")
+	public void deve_deletar_um_produto() throws Exception {
+		// Cenário
+		var id = 123l;
+		given(service.findById(anyLong())).willReturn(Produto.builder().id(id).build());
 
-		Mockito.doNothing().when(service).delete(Mockito.anyLong());
+		// Execução
 
 		// @formatter:off
-		MockHttpServletRequestBuilder request = 
+		var request = 
 			MockMvcRequestBuilders
-			.delete(URL_API+"/10")
+			.delete(URL_API + "/{id}", "1")
 			.header("Authorization", "Bearer " + accessToken)
 			.contentType(MediaType.APPLICATION_JSON)
-			.accept(MediaType.APPLICATION_JSON)
-			;
+			.accept(MediaType.APPLICATION_JSON);
 
 		mvc
 			.perform(request)
@@ -177,61 +154,105 @@ public class ProdutoResourceTest {
 
 		// @formatter:on
 	}
-	
 
 	@Test
-	@DisplayName("Deve retornar erro ao remover um produto inexistente")
-	public void deve_retornar_erro_ao_remover_produto_inexistente() throws Exception {
-		String accessToken = obtainAccessToken();
+	@DisplayName("Deve retornar not found ao deletar um produto inexistente")
+	public void deve_retornar_not_found_ao_deletar_um_produto_inexistente() throws Exception {
+		// Cenário
+		doThrow(new ResourceNotFoundException()).when(service).delete(anyLong());
 
-		Mockito.doThrow(EmptyResultDataAccessException.class).when(service).delete(Mockito.anyLong());
+		// Execução
+		var request = MockMvcRequestBuilders.delete(URL_API + "/{id}", 1l).header("Authorization",
+				"Bearer " + accessToken);
+
+		mvc.perform(request).andExpect(status().isNotFound());
+	}
+
+	@Test
+	@DisplayName("Deve retornar uma lista de produtos por nome")
+	public void deve_pesquisar_uma_lista_produto_por_nome() throws Exception {
+		// @formatter:off
+
+		var produto = ProdutoTestHelper.getProduto();
+		var lista = new ArrayList<Produto>();
+		lista.add(produto);
+
+		// Cenário
+		given(service.findByDescricaoIgnoreCaseContaining(anyString())).willReturn(lista);
+
+		// Execução
+		var request = MockMvcRequestBuilders
+				.get(URL_API + "?descricao=teste")
+				.header("Authorization", "Bearer " + accessToken)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON);
+
+		mvc.perform(request)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$..descricao").exists());
+		// @formatter:on
+	}
+
+	@Test
+	@DisplayName("Deve alterar um produto")
+	public void deve_alterar_um_produto() throws Exception {
+		// Cenário
+		var produto = ProdutoTestHelper.getProduto(1l);
+		produto.setDescricao("Descrição Alterada");
+		given(service.update(any(Produto.class))).willReturn(produto);
+
+		var dto = ProdutoTestHelper.getProdutoDTO(1l);
+
+		var json = toJson(dto);
+
+		// Execução
 
 		// @formatter:off
-		MockHttpServletRequestBuilder request = 
+		var request = 
 			MockMvcRequestBuilders
-			.delete(URL_API+"/10")
+			.put(URL_API)
 			.header("Authorization", "Bearer " + accessToken)
 			.contentType(MediaType.APPLICATION_JSON)
 			.accept(MediaType.APPLICATION_JSON)
-			;
+			.content(json);
 
 		mvc
 			.perform(request)
-			.andExpect(status().isNotFound());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("id").value(dto.getId()))
+			.andExpect(jsonPath("descricao").value("Descrição Alterada"));
 
 		// @formatter:on
+	}
+
+	@Test
+	@DisplayName("Deve buscar um produto pelo código")
+	public void deve_buscar_um_produto_pelo_codigo() throws Exception {
+		// Cenário
+		var produto = ProdutoTestHelper.getProduto(1l);
+		given(service.findById(anyLong())).willReturn(produto);
+
+		// Execução
+		// @formatter:off
+		var request = 
+			MockMvcRequestBuilders
+			.get(URL_API + "/{id}", 1l)
+			.header("Authorization", "Bearer " + accessToken)
+			.contentType(MediaType.APPLICATION_JSON)
+			.accept(MediaType.APPLICATION_JSON);
+
+		mvc
+			.perform(request)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("descricao").value(produto.getDescricao()));
+
+        // @formatter:on
 	}
 
 	private String toJson(ProdutoDTO dto) throws JsonProcessingException {
-		ObjectMapper objectMapper = new ObjectMapper();
+		var objectMapper = new ObjectMapper();
 		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		String json = objectMapper.writeValueAsString(dto);
+		var json = objectMapper.writeValueAsString(dto);
 		return json;
-	}
-
-	private ProdutoDTO novoProdutoDTO() {
-		// @formatter:off
-		var dto = ProdutoDTO.builder()
-			.codigo("10")
-			.descricao("Filtro")
-			.precoCusto(BigDecimal.ONE)
-			.precoVenda(BigDecimal.TEN)
-			.estoque(10)
-			.build();
-		return dto;
-		// @formatter:on
-	}
-
-	private Produto novoProduto() {
-		// @formatter:off
-		var usuario = Produto.builder()
-				.codigo("10")
-				.descricao("Filtro")
-				.precoCusto(BigDecimal.ONE)
-				.precoVenda(BigDecimal.TEN)
-				.estoque(10)
-				.build();
-		return usuario;
-		// @formatter:on
 	}
 }

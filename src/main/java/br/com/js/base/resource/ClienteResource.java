@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -36,7 +35,7 @@ import br.com.js.base.service.ClienteService;
 public class ClienteResource {
 
 	@Autowired
-	private ClienteService cadastroClienteService;
+	private ClienteService clienteService;
 
 	@Autowired
 	private ApplicationEventPublisher publisher;
@@ -46,7 +45,7 @@ public class ClienteResource {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ClienteDTO> buscarPeloCodigo(@PathVariable Long id) {
-		var cliente = cadastroClienteService.findById(id);
+		var cliente = clienteService.findById(id);
 
 		if (cliente == null) {
 			return ResponseEntity.notFound().build();
@@ -58,7 +57,7 @@ public class ClienteResource {
 	@GetMapping
 	public ResponseEntity<List<ClienteDTO>> buscarPeloNome(
 			@RequestParam(required = false, defaultValue = "%") String nome) {
-		var clientes = cadastroClienteService.findByNomeIgnoringCaseContaining(nome);
+		var clientes = clienteService.findByNomeIgnoreCaseContaining(nome);
 		return ResponseEntity.ok(toListDTO(clientes));
 	}
 
@@ -66,34 +65,32 @@ public class ClienteResource {
 	public ResponseEntity<Cliente> salvar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
 		var cliente = toEntity(clienteDTO);
 //		cliente.setDataCadastro(OffsetDateTime.now());
-		var clienteSalvo = cadastroClienteService.save(cliente);
+		var clienteSalvo = clienteService.save(cliente);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, clienteSalvo.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
 	}
 
-	@PutMapping
+	@PutMapping()
 	public ResponseEntity<ClienteDTO> alterar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletResponse response) {
 		var cliente = toEntity(clienteDTO);
-		var clienteSalvo = cadastroClienteService.findById(cliente.getId());
-		BeanUtils.copyProperties(cliente, clienteSalvo);
-		var clienteAlterado = cadastroClienteService.update(clienteSalvo);
+		var clienteAlterado = clienteService.update(cliente);
 		var dto = toDTO(clienteAlterado);
 		return ResponseEntity.ok(dto);
 	}
 
 	@GetMapping("/{idCliente}/enderecos")
 	public List<EnderecoDTO> pesquisarEnderecos(@PathVariable Long idCliente){
-		var cliente = cadastroClienteService.findById(idCliente);
+		var cliente = clienteService.findById(idCliente);
 		return toEnderecosDTO(cliente.getEnderecos());
 	}
 	
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Long id) {
-		if (cadastroClienteService.findById(id) == null) {
+		if (clienteService.findById(id) == null) {
 			throw new ResourceNotFoundException();
 		}
-		cadastroClienteService.delete(id);
+		clienteService.delete(id);
 	}
 
 	private ClienteDTO toDTO(Cliente cliente) {

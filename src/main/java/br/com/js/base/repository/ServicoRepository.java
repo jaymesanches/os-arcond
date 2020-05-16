@@ -8,4 +8,5 @@ import br.com.js.base.model.Servico;
 
 public interface ServicoRepository extends JpaRepository<Servico, Long> {
 	List<Servico> findByDescricaoIgnoreCaseContaining(String descricao);
+	boolean existsByDescricaoIgnoreCaseContaining(String descricao);
 }
