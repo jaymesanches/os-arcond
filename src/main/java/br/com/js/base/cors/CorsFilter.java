@@ -19,10 +19,7 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter {
 
-//	@Autowired
-//	private BaseAuthProperty baseAuthProperty;
-	
-	private String origemPermitida = "http://localhost:4200";
+	private String origemPermitida = "http://localhost:8080";
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -31,13 +28,10 @@ public class CorsFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 
-		// response.setHeader("Access-Control-Allow-Origin",
-		// baseAuthProperty.getOriginPermitida());
 		response.setHeader("Access-Control-Allow-Origin", origemPermitida);
 		response.setHeader("Access-Control-Allow-Credentials", "true");
 
 		if ("OPTIONS".equals(request.getMethod())
-				// && baseAuthProperty.getOriginPermitida().equals(request.getHeader("Origin"))) {
 			   && origemPermitida.equals(request.getHeader("Origin"))) {
 			response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
 			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
@@ -52,10 +46,12 @@ public class CorsFilter implements Filter {
 
 	@Override
 	public void destroy() {
+	  // Not used. but exists.
 	}
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
+	   // Not used. but exists.
 	}
 
 }

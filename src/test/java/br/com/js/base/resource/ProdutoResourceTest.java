@@ -41,26 +41,26 @@ import br.com.js.base.service.ProdutoService;
 @AutoConfigureMockMvc
 public class ProdutoResourceTest extends BaseResourceTest {
 
-	private final String URL_API = "/produtos";
+  private final String URL_API = "/produtos";
 
-	// Simula as requisições http
-	@Autowired
-	MockMvc mvc;
+  // Simula as requisições http
+  @Autowired
+  MockMvc mvc;
 
-	@MockBean
-	ProdutoService service;
+  @MockBean
+  ProdutoService service;
 
-	private String accessToken;
+  private String accessToken;
 
-	@BeforeEach
-	public void setup() throws Exception {
-		accessToken = obtainAccessToken("admin@admin.com", "senhas");
-	}
+  @BeforeEach
+  public void setup() throws Exception {
+    accessToken = obtainAccessToken("admin@admin.com", "senhas");
+  }
 
-	@Test
-	@DisplayName("Deve listar todos os produtos")
-	public void deve_listar_todos_os_produtos() throws Exception {
-		// @formatter:off
+  @Test
+  @DisplayName("Deve listar todos os produtos")
+  public void deve_listar_todos_os_produtos() throws Exception {
+    // @formatter:off
 		var request = 
 			MockMvcRequestBuilders
 			.get(URL_API)
@@ -73,12 +73,12 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.perform(request)
 			.andExpect(status().isOk());
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve retornar erro ao criar um produto sem descrição")
-	public void deve_retornar_erro_ao_criar_produto_sem_descricao() throws Exception {
-		// @formatter:off
+  @Test
+  @DisplayName("Deve retornar erro ao criar um produto sem descrição")
+  public void deve_retornar_erro_ao_criar_produto_sem_descricao() throws Exception {
+    // @formatter:off
 		var dto = ProdutoTestHelper.getProdutoDTO();
 		dto.setDescricao(null);
 
@@ -101,19 +101,19 @@ public class ProdutoResourceTest extends BaseResourceTest {
 		assertThat(result).isInstanceOf(MethodArgumentNotValidException.class);
 		
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve criar um novo produto")
-	public void deve_criar_um_novo_produto() throws Exception {
-		var produto = ProdutoTestHelper.getProduto(1l);
-		var dto = ProdutoTestHelper.getProdutoDTO();
+  @Test
+  @DisplayName("Deve criar um novo produto")
+  public void deve_criar_um_novo_produto() throws Exception {
+    var produto = ProdutoTestHelper.getProduto(1l);
+    var dto = ProdutoTestHelper.getProdutoDTO();
 
-		given(service.save(any(Produto.class))).willReturn(produto);
+    given(service.save(any(Produto.class))).willReturn(produto);
 
-		var json = toJson(dto);
+    var json = toJson(dto);
 
-		// @formatter:off
+    // @formatter:off
 		var request = 
 			MockMvcRequestBuilders
 			.post(URL_API)
@@ -129,18 +129,18 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.andExpect(jsonPath("descricao").value(dto.getDescricao()));
 
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve deletar um produto existente")
-	public void deve_deletar_um_produto() throws Exception {
-		// Cenário
-		var id = 123l;
-		given(service.findById(anyLong())).willReturn(Produto.builder().id(id).build());
+  @Test
+  @DisplayName("Deve deletar um produto existente")
+  public void deve_deletar_um_produto() throws Exception {
+    // Cenário
+    var id = 123l;
+    given(service.findById(anyLong())).willReturn(Produto.builder().id(id).build());
 
-		// Execução
+    // Execução
 
-		// @formatter:off
+    // @formatter:off
 		var request = 
 			MockMvcRequestBuilders
 			.delete(URL_API + "/{id}", "1")
@@ -153,25 +153,24 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.andExpect(status().isNoContent());
 
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve retornar not found ao deletar um produto inexistente")
-	public void deve_retornar_not_found_ao_deletar_um_produto_inexistente() throws Exception {
-		// Cenário
-		doThrow(new ResourceNotFoundException()).when(service).delete(anyLong());
+  @Test
+  @DisplayName("Deve retornar not found ao deletar um produto inexistente")
+  public void deve_retornar_not_found_ao_deletar_um_produto_inexistente() throws Exception {
+    // Cenário
+    doThrow(new ResourceNotFoundException()).when(service).delete(anyLong());
 
-		// Execução
-		var request = MockMvcRequestBuilders.delete(URL_API + "/{id}", 1l).header("Authorization",
-				"Bearer " + accessToken);
+    // Execução
+    var request = MockMvcRequestBuilders.delete(URL_API + "/{id}", 1l).header("Authorization", "Bearer " + accessToken);
 
-		mvc.perform(request).andExpect(status().isNotFound());
-	}
+    mvc.perform(request).andExpect(status().isNotFound());
+  }
 
-	@Test
-	@DisplayName("Deve retornar uma lista de produtos por nome")
-	public void deve_pesquisar_uma_lista_produto_por_nome() throws Exception {
-		// @formatter:off
+  @Test
+  @DisplayName("Deve retornar uma lista de produtos por nome")
+  public void deve_pesquisar_uma_lista_produto_por_nome() throws Exception {
+    // @formatter:off
 
 		var produto = ProdutoTestHelper.getProduto();
 		var lista = new ArrayList<Produto>();
@@ -191,23 +190,20 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$..descricao").exists());
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve alterar um produto")
-	public void deve_alterar_um_produto() throws Exception {
-		// Cenário
-		var produto = ProdutoTestHelper.getProduto(1l);
-		produto.setDescricao("Descrição Alterada");
-		given(service.update(any(Produto.class))).willReturn(produto);
+  @Test
+  @DisplayName("Deve alterar um produto")
+  public void deve_alterar_um_produto() throws Exception {
+    var produto = ProdutoTestHelper.getProduto(1l);
+    produto.setDescricao("Descrição Alterada");
+    given(service.update(any(Produto.class))).willReturn(produto);
 
-		var dto = ProdutoTestHelper.getProdutoDTO(1l);
+    var dto = ProdutoTestHelper.getProdutoDTO(1l);
 
-		var json = toJson(dto);
+    var json = toJson(dto);
 
-		// Execução
-
-		// @formatter:off
+    // @formatter:off
 		var request = 
 			MockMvcRequestBuilders
 			.put(URL_API)
@@ -223,17 +219,15 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.andExpect(jsonPath("descricao").value("Descrição Alterada"));
 
 		// @formatter:on
-	}
+  }
 
-	@Test
-	@DisplayName("Deve buscar um produto pelo código")
-	public void deve_buscar_um_produto_pelo_codigo() throws Exception {
-		// Cenário
-		var produto = ProdutoTestHelper.getProduto(1l);
-		given(service.findById(anyLong())).willReturn(produto);
+  @Test
+  @DisplayName("Deve buscar um produto pelo código")
+  public void deve_buscar_um_produto_pelo_codigo() throws Exception {
+    var produto = ProdutoTestHelper.getProduto(1l);
+    given(service.findById(anyLong())).willReturn(produto);
 
-		// Execução
-		// @formatter:off
+    // @formatter:off
 		var request = 
 			MockMvcRequestBuilders
 			.get(URL_API + "/{id}", 1l)
@@ -246,13 +240,33 @@ public class ProdutoResourceTest extends BaseResourceTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("descricao").value(produto.getDescricao()));
 
-        // @formatter:on
-	}
+    // @formatter:on
+  }
 
-	private String toJson(ProdutoDTO dto) throws JsonProcessingException {
-		var objectMapper = new ObjectMapper();
-		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		var json = objectMapper.writeValueAsString(dto);
-		return json;
-	}
+  @Test
+  @DisplayName("Deve retornar not found ao buscar um produto pelo código inválido")
+  public void deve_retornar_not_found_ao_buscar_um_produto_pelo_codigo_invalido() throws Exception {
+    // @formatter:off
+    given(service.findById(anyLong())).willReturn(null);
+    
+    var request = 
+      MockMvcRequestBuilders
+      .get(URL_API + "/{id}", 999l)
+      .header("Authorization", "Bearer " + accessToken)
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON);
+
+    mvc
+      .perform(request)
+      .andExpect(status().isNotFound());
+
+    // @formatter:on
+  }
+
+  private String toJson(ProdutoDTO dto) throws JsonProcessingException {
+    var objectMapper = new ObjectMapper();
+    objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+    var json = objectMapper.writeValueAsString(dto);
+    return json;
+  }
 }

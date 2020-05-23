@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import br.com.js.base.security.UsuarioSistema;
 
+@SuppressWarnings("deprecation")
 public class CustomTokenEnhancer implements TokenEnhancer {
 
 	@Override

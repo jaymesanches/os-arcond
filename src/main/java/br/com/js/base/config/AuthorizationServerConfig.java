@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import br.com.js.base.config.token.CustomTokenEnhancer;
 
+@SuppressWarnings("deprecation") 
 @Configuration
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
