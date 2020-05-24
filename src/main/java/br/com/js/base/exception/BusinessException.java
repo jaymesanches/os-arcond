@@ -7,9 +7,9 @@ public class BusinessException extends RuntimeException{
 	private static final long serialVersionUID = 1L;
 	
 	@Getter
-	private String mensagem;
+	private String message;
 
-	public BusinessException(String mensagem) {
-		this.mensagem = mensagem;
+	public BusinessException(String message) {
+		this.message = message;
 	}
 }
