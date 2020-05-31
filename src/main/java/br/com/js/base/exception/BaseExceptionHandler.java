@@ -47,10 +47,9 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
 	
-	
 	@ExceptionHandler({ EmptyResultDataAccessException.class })
 	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
-		String userMessage = messageSource.getMessage("recurso.nao-encontrado", null, LocaleContextHolder.getLocale());
+		String userMessage = messageSource.getMessage("resource.not-found", null, LocaleContextHolder.getLocale());
 		String devMessage = ex.toString();
 		List<Error> erros = Arrays.asList(new Error(userMessage, devMessage));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
@@ -58,7 +57,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	@ExceptionHandler({ DataIntegrityViolationException.class } )
 	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
-		String userMessage = messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());
+		String userMessage = messageSource.getMessage("resource.not-permited", null, LocaleContextHolder.getLocale());
 		String devMessage = ExceptionUtils.getRootCauseMessage(ex);
 		List<Error> erros = Arrays.asList(new Error(userMessage, devMessage));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -66,7 +65,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	@ExceptionHandler({ ResourceNotFoundException.class } )
 	public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-		String userMessage = messageSource.getMessage("recurso.nao-encontrado", null, LocaleContextHolder.getLocale());
+		String userMessage = messageSource.getMessage("resource.not-found", null, LocaleContextHolder.getLocale());
 		String devMessage = ExceptionUtils.getRootCauseMessage(ex);
 		List<Error> erros = Arrays.asList(new Error(userMessage, devMessage));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);

@@ -192,6 +192,8 @@ public class WorkResourceTest extends BaseResourceTest {
   @Test
   @DisplayName("Deve retornar erro ao pesquisar por nome sem nome")
   public void Should_ThrowException_When_FindWorksByNameWithoutName() throws Exception {
+    given(service.findByNameIgnoreCaseContaining(null)).willThrow(new BusinessException("Nome precisa ser preenchido"));
+    
     Throwable exception = Assertions.catchThrowable(() -> service.findByNameIgnoreCaseContaining(null));
 
     assertThat(exception).isInstanceOf(BusinessException.class);

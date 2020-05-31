@@ -82,7 +82,6 @@ public class OrderResource {
     var dto = toDTO(updatedOrder);
     return ResponseEntity.ok(dto);
   }
-
   
   private OrderDTO toDTO(Order order) {
     return modelMapper.map(order, OrderDTO.class);
