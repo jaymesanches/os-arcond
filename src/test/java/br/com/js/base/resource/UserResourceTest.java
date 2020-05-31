@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.UserDTO;
+import br.com.js.base.exception.BusinessException;
 import br.com.js.base.helper.UserTestHelper;
 import br.com.js.base.model.User;
 import br.com.js.base.service.UserService;
@@ -190,6 +192,15 @@ public class UserResourceTest extends BaseResourceTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$..name").exists());
 		// @formatter:on
+  }
+  
+  @Test
+  @DisplayName("Deve retornar erro ao pesquisar por nome sem nome")
+  public void Should_ThrowException_When_FindUsersByNameWithoutName() throws Exception {
+    Throwable exception = Assertions.catchThrowable(() -> service.findByNameIgnoreCaseContaining(null));
+
+    assertThat(exception).isInstanceOf(BusinessException.class);
+    assertThat(exception).hasFieldOrPropertyWithValue("message", "Nome precisa ser preenchido");
   }
 
   @Test

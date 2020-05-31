@@ -100,13 +100,13 @@ public class ClientResourceTest extends BaseResourceTest {
 
   @Test
   @DisplayName("Deve criar um novo cliente")
-  public void Should_SaveClient() throws Exception {
+  public void Should_RetunrCreated_When_SaveClient() throws Exception {
     var client = ClientTestHelper.getClient(1l);
     var dto = ClientTestHelper.getClientDTO();
+    var json = toJson(dto);
 
     given(service.save(any(Client.class))).willReturn(client);
 
-    var json = toJson(dto);
 
     // @formatter:off
 		var request = 
@@ -128,7 +128,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
   @Test
   @DisplayName("Deve deletar um cliente existente")
-  public void Should_DeleteClient() throws Exception {
+  public void Should_ReturnNoContent_When_DeleteClient() throws Exception {
     // @formatter:off
     var id = 123l;
     given(service.findById(anyLong())).willReturn(Client.builder().id(id).build());

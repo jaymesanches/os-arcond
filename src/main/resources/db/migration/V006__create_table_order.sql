@@ -5,7 +5,7 @@ CREATE TABLE os_order (
 	price DECIMAL(10,2) NOT NULL,
 	discount DECIMAL(10,2),
 	date_in TIMESTAMP NOT NULL,
-	data_out TIMESTAMP,
+	date_out TIMESTAMP,
 	date_end TIMESTAMP,
 	status VARCHAR(20) NOT NULL,
 	id_client BIGINT NOT NULL,

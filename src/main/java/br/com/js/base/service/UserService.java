@@ -18,7 +18,7 @@ public class UserService {
 	@Autowired
 	private UserRepository repository;
 
-	public List<User> listar() {
+	public List<User> findAll() {
 		return repository.findAll();
 	}
 
@@ -52,9 +52,5 @@ public class UserService {
 		}
 
 		repository.deleteById(id);
-	}
-
-	public List<User> findAll() {
-		return repository.findAll();
 	}
 }
