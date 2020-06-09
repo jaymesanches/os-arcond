@@ -21,6 +21,10 @@ public abstract class BaseResourceTest {
 	MockMvc mvc;
 	
 	public String obtainAccessToken(String username, String password) throws Exception {
+	  
+	  System.out.println("-------------------------");
+	  System.out.println("------GETTING TOKEN------");
+	  System.out.println("-------------------------");
 
 		var params = new LinkedMultiValueMap<String, String>();
 		params.add("grant_type", "password");

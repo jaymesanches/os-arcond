@@ -28,7 +28,7 @@ public class WorkService {
 
 	public List<Work> findByNameIgnoreCaseContaining(String name) {
 		if (name == null) {
-			throw new BusinessException("Nome precisa ser preenchido");
+			throw new BusinessException("Nome precisa ser preenchido.");
 		}
 
 		return repository.findByNameIgnoreCaseContaining(name);

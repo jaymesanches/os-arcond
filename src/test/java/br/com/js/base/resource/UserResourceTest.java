@@ -11,16 +11,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,6 +50,7 @@ import br.com.js.base.service.UserService;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 public class UserResourceTest extends BaseResourceTest {
 
   private final String URL_API = "/users";
@@ -55,7 +64,7 @@ public class UserResourceTest extends BaseResourceTest {
 
   private String accessToken;
 
-  @BeforeEach
+  @BeforeAll
   public void setup() throws Exception {
     accessToken = obtainAccessToken("admin@admin.com", "senhas");
   }
@@ -193,12 +202,12 @@ public class UserResourceTest extends BaseResourceTest {
 			.andExpect(jsonPath("$..name").exists());
 		// @formatter:on
   }
-  
+
   @Test
   @DisplayName("Deve retornar erro ao pesquisar por nome sem nome")
   public void Should_ThrowException_When_FindUsersByNameWithoutName() throws Exception {
     given(service.findByNameIgnoreCaseContaining(null)).willThrow(new BusinessException("Nome precisa ser preenchido"));
-    
+
     Throwable exception = Assertions.catchThrowable(() -> service.findByNameIgnoreCaseContaining(null));
 
     assertThat(exception).isInstanceOf(BusinessException.class);
@@ -271,6 +280,35 @@ public class UserResourceTest extends BaseResourceTest {
     mvc
       .perform(request)
       .andExpect(status().isNotFound());
+
+    // @formatter:on
+  }
+
+  @Test
+  @DisplayName("Deve pesquisar usuário paginado")
+  public void Should_ReturnUsersPage_When_FindByFilter() throws Exception {
+    // @formatter:off
+
+    var user = UserTestHelper.getUser(1L);
+    var dto = UserTestHelper.getUserDTO(1L);
+
+    BDDMockito.given(service.find(Mockito.any(User.class), Mockito.any(Pageable.class)))
+        .willReturn(new PageImpl<User>(Arrays.asList(user), PageRequest.of(0, 100), 1));
+
+    var queryString = String.format("/filter?name=%s&email=%s&page=0&size=100", dto.getName(), dto.getEmail());
+
+    var request = MockMvcRequestBuilders
+        .get(URL_API.concat(queryString))
+        .header("Authorization", "Bearer " + accessToken)
+        .accept(MediaType.APPLICATION_JSON);
+
+    mvc
+      .perform(request)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("content", org.hamcrest.Matchers.hasSize(1)))
+      .andExpect(jsonPath("totalElements").value(1))
+      .andExpect(jsonPath("pageable.pageSize").value(100))
+      .andExpect(jsonPath("pageable.pageNumber").value(0));
 
     // @formatter:on
   }

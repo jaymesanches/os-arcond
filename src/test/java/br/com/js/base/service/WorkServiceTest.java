@@ -34,130 +34,140 @@ import br.com.js.base.repository.WorkRepository;
 @AutoConfigureMockMvc
 public class WorkServiceTest {
 
-	@Autowired
-	MockMvc mvc;
+  @Autowired
+  MockMvc mvc;
 
-	@Autowired
-	WorkService service;
+  @Autowired
+  WorkService service;
 
-	@MockBean
-	WorkRepository repository;
+  @MockBean
+  WorkRepository repository;
 
-	@Test
-	@DisplayName("Deve pesquisar todos os serviços")
-	public void Should_ReturnList_FindAllWorks() throws Exception {
-		var works = WorkTestHelper.getWorkList();
+  @Test
+  @DisplayName("Deve pesquisar todos os serviços")
+  public void Should_ReturnList_FindAllWorks() throws Exception {
+    var works = WorkTestHelper.getWorkList();
 
-		when(repository.findAll()).thenReturn(works);
+    when(repository.findAll()).thenReturn(works);
 
-		var list = service.findAll();
+    var list = service.findAll();
 
-		assertThat(list).isNotEmpty();
-		assertThat(list.size()).isEqualTo(2);
-	}
+    assertThat(list).isNotEmpty();
+    assertThat(list.size()).isEqualTo(2);
+  }
 
-	@Test
-	@DisplayName("Deve retornar um serviço pelo id")
-	public void Should_ReturnWork_When_FindWorkById() throws Exception {
-		var optionalWork = Optional.of(WorkTestHelper.getWork());
-		when(repository.findById(anyLong())).thenReturn((optionalWork));
+  @Test
+  @DisplayName("Deve retornar um serviço pelo id")
+  public void Should_ReturnWork_When_FindWorkById() throws Exception {
+    var optionalWork = Optional.of(WorkTestHelper.getWork());
+    when(repository.findById(anyLong())).thenReturn((optionalWork));
 
-		var savedWork = service.findById(1l);
-		assertThat(savedWork).isNotNull();
-	}
+    var savedWork = service.findById(1l);
+    assertThat(savedWork).isNotNull();
+  }
 
-	@Test
-	@DisplayName("Deve retornar nulo quando pesquisar por id inválido")
-	public void Should_ReturnNull_When_FindWorkByInvalidId() throws Exception {
-		when(repository.findById(anyLong())).thenReturn(Optional.empty());
+  @Test
+  @DisplayName("Deve retornar nulo quando pesquisar por id inválido")
+  public void Should_ReturnNull_When_FindWorkByInvalidId() throws Exception {
+    when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
-		var work = service.findById(1l);
-		
-		assertThat(work).isNull();
-	}
+    var work = service.findById(1l);
 
-	@Test
-	@DisplayName("Deve retornar uma lista de produtos ao pesquisa por parte da descrição")
-	public void Should_ReturnList_When_FindWorksByName() throws Exception {
-		var works = WorkTestHelper.getWorkList();
-		when(repository.findByNameIgnoreCaseContaining(anyString())).thenReturn(works);
+    assertThat(work).isNull();
+  }
 
-		var list = service.findByNameIgnoreCaseContaining("filtro");
-		
-		assertThat(list.size()).isEqualTo(2);
-	}
+  @Test
+  @DisplayName("Deve retornar uma lista de produtos ao pesquisa por parte da descrição")
+  public void Should_ReturnList_When_FindWorksByName() throws Exception {
+    var works = WorkTestHelper.getWorkList();
+    when(repository.findByNameIgnoreCaseContaining(anyString())).thenReturn(works);
 
-	@Test
-	@DisplayName("Deve salvar um serviço")
-	public void Should_ReturnWork_When_SaveWork() {
-		var work = WorkTestHelper.getWork();
+    var list = service.findByNameIgnoreCaseContaining("filtro");
 
-		when(repository.save(work)).thenReturn(WorkTestHelper.getWork(1l));
+    assertThat(list.size()).isEqualTo(2);
+  }
 
-		var savedWork = service.save(work);
+  @Test
+  @DisplayName("Deve retornar erro ao pesquisas por nome sem o nome")
+  public void Should_ThroeException_When_FindWorksByName() throws Exception {
 
-		assertThat(savedWork.getId()).isNotNull();
-		assertThat(savedWork.getName()).asString().contains("Filtro");
-	}
+    var exception = Assertions.catchThrowable(() -> service.findByNameIgnoreCaseContaining(null));
 
-	@Test
-	@DisplayName("Deve remover um serviço")
-	public void Should_DeleteWork() throws Exception {
-		when(repository.existsById(anyLong())).thenReturn(true);
-		
-		service.delete(123l);
-		
-		verify(repository, atLeastOnce()).deleteById(anyLong());
-	}
+    assertThat(exception).isInstanceOf(BusinessException.class).hasFieldOrPropertyWithValue("message",
+        "Nome precisa ser preenchido.");
+  }
 
-	@Test
-	@DisplayName("Deve retornar exceção ao tentar remover um serviço com id inválido")
-	public void Should_ThrowException_When_DeleteInvalidWork() throws Exception {
-		doNothing().when(repository).deleteById(anyLong());
-		
-		Throwable exception = Assertions.catchThrowable(() -> service.delete(1l));
+  @Test
+  @DisplayName("Deve salvar um serviço")
+  public void Should_ReturnWork_When_SaveWork() {
+    var work = WorkTestHelper.getWork();
 
-		assertThat(exception).isInstanceOf(BusinessException.class).hasFieldOrPropertyWithValue("message",
-				"Serviço inexistente");
-	}
+    when(repository.save(work)).thenReturn(WorkTestHelper.getWork(1l));
 
-	@Test
-	@DisplayName("Deve retornar erro ao criar um serviço com dados incompletos")
-	public void Should_ThrowException_When_SaveWorkWithoutName() {
-		var work = WorkTestHelper.getWork();
-		work.setName(null);
+    var savedWork = service.save(work);
 
-		when(repository.save(work)).thenThrow(DataIntegrityViolationException.class);
+    assertThat(savedWork.getId()).isNotNull();
+    assertThat(savedWork.getName()).asString().contains("Filtro");
+  }
 
-		Throwable exception = Assertions.catchThrowable(() -> service.save(work));
+  @Test
+  @DisplayName("Deve remover um serviço")
+  public void Should_DeleteWork() throws Exception {
+    when(repository.existsById(anyLong())).thenReturn(true);
 
-		assertThat(exception).isInstanceOf(DataIntegrityViolationException.class);
-	}
-	
-	@Test
-	@DisplayName("Deve alterar um serviço")
-	public void Should_ReturnUpdatedWork_When_UpdateWork() throws Exception {
-		var work = WorkTestHelper.getWork(1l);
+    service.delete(123l);
 
-		when(repository.findById(1l)).thenReturn(Optional.of(work));
-		when(repository.save(work)).thenReturn(work);
-		
-		var savedWork = service.update(work);
-		
-		assertThat(savedWork.getName().equals(work.getName()));
-		verify(repository, Mockito.atLeastOnce()).save(work);
-	}
-	
-	@Test
-	@DisplayName("Deve retornar erro ao alterar um serviço não existente")
-	public void Should_ThrowException_When_UpdateInvalidClient() throws Exception {
-		var work = WorkTestHelper.getWork();
-		
-		when(repository.findById(anyLong())).thenThrow(new ResourceNotFoundException("Cliente não existe"));
-		
-		Throwable exception = Assertions.catchThrowable(() -> service.update(work));
-		
-		assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
-		verify(repository, never()).save(work);
-	}
+    verify(repository, atLeastOnce()).deleteById(anyLong());
+  }
+
+  @Test
+  @DisplayName("Deve retornar exceção ao tentar remover um serviço com id inválido")
+  public void Should_ThrowException_When_DeleteInvalidWork() throws Exception {
+    doNothing().when(repository).deleteById(anyLong());
+
+    Throwable exception = Assertions.catchThrowable(() -> service.delete(1l));
+
+    assertThat(exception).isInstanceOf(BusinessException.class).hasFieldOrPropertyWithValue("message",
+        "Serviço inexistente");
+  }
+
+  @Test
+  @DisplayName("Deve retornar erro ao criar um serviço com dados incompletos")
+  public void Should_ThrowException_When_SaveWorkWithoutName() {
+    var work = WorkTestHelper.getWork();
+    work.setName(null);
+
+    when(repository.save(work)).thenThrow(DataIntegrityViolationException.class);
+
+    Throwable exception = Assertions.catchThrowable(() -> service.save(work));
+
+    assertThat(exception).isInstanceOf(DataIntegrityViolationException.class);
+  }
+
+  @Test
+  @DisplayName("Deve alterar um serviço")
+  public void Should_ReturnUpdatedWork_When_UpdateWork() throws Exception {
+    var work = WorkTestHelper.getWork(1l);
+
+    when(repository.findById(1l)).thenReturn(Optional.of(work));
+    when(repository.save(work)).thenReturn(work);
+
+    var savedWork = service.update(work);
+
+    assertThat(savedWork.getName().equals(work.getName()));
+    verify(repository, Mockito.atLeastOnce()).save(work);
+  }
+
+  @Test
+  @DisplayName("Deve retornar erro ao alterar um serviço não existente")
+  public void Should_ThrowException_When_UpdateInvalidClient() throws Exception {
+    var work = WorkTestHelper.getWork();
+
+    when(repository.findById(anyLong())).thenThrow(new ResourceNotFoundException("Cliente não existe"));
+
+    Throwable exception = Assertions.catchThrowable(() -> service.update(work));
+
+    assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
+    verify(repository, never()).save(work);
+  }
 }

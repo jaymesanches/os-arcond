@@ -13,9 +13,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
@@ -40,6 +42,7 @@ import br.com.js.base.service.OrderService;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 public class OrderResourceTest extends BaseResourceTest {
 
   private final String URL_API = "/orders";
@@ -49,7 +52,7 @@ public class OrderResourceTest extends BaseResourceTest {
 
   private String accessToken;
 
-  @BeforeEach
+  @BeforeAll
   public void setup() throws Exception {
     accessToken = obtainAccessToken("admin@admin.com", "senhas");
   }

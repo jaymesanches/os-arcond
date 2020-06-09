@@ -12,9 +12,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,7 @@ import br.com.js.base.service.WorkService;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 public class WorkResourceTest extends BaseResourceTest {
 
   private final String URL_API = "/works";
@@ -55,7 +58,7 @@ public class WorkResourceTest extends BaseResourceTest {
 
   private String accessToken;
 
-  @BeforeEach
+  @BeforeAll
   public void setup() throws Exception {
     accessToken = obtainAccessToken("admin@admin.com", "senhas");
   }

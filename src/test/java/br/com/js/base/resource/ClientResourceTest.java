@@ -11,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,14 +32,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.ClientDTO;
-import br.com.js.base.helper.ClientTestHelper;
 import br.com.js.base.helper.AddressTestHelper;
+import br.com.js.base.helper.ClientTestHelper;
 import br.com.js.base.model.Client;
 import br.com.js.base.service.ClientService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(Lifecycle.PER_CLASS)
 public class ClientResourceTest extends BaseResourceTest {
 
   private final String URL_API = "/clients";
@@ -47,7 +50,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
   private String accessToken;
 
-  @BeforeEach
+  @BeforeAll
   public void setup() throws Exception {
     accessToken = obtainAccessToken("admin@admin.com", "senhas");
   }
