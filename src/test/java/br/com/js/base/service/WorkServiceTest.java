@@ -125,7 +125,7 @@ public class WorkServiceTest {
   public void Should_ThrowException_When_DeleteInvalidWork() throws Exception {
     doNothing().when(repository).deleteById(anyLong());
 
-    Throwable exception = Assertions.catchThrowable(() -> service.delete(1l));
+    var exception = Assertions.catchThrowable(() -> service.delete(1l));
 
     assertThat(exception).isInstanceOf(BusinessException.class).hasFieldOrPropertyWithValue("message",
         "Serviço inexistente");
@@ -139,7 +139,7 @@ public class WorkServiceTest {
 
     when(repository.save(work)).thenThrow(DataIntegrityViolationException.class);
 
-    Throwable exception = Assertions.catchThrowable(() -> service.save(work));
+    var exception = Assertions.catchThrowable(() -> service.save(work));
 
     assertThat(exception).isInstanceOf(DataIntegrityViolationException.class);
   }
@@ -154,7 +154,7 @@ public class WorkServiceTest {
 
     var savedWork = service.update(work);
 
-    assertThat(savedWork.getName().equals(work.getName()));
+    assertThat(savedWork.getName()).isEqualTo(work.getName());
     verify(repository, Mockito.atLeastOnce()).save(work);
   }
 
@@ -165,7 +165,7 @@ public class WorkServiceTest {
 
     when(repository.findById(anyLong())).thenThrow(new ResourceNotFoundException("Cliente não existe"));
 
-    Throwable exception = Assertions.catchThrowable(() -> service.update(work));
+    var exception = Assertions.catchThrowable(() -> service.update(work));
 
     assertThat(exception).isInstanceOf(ResourceNotFoundException.class);
     verify(repository, never()).save(work);

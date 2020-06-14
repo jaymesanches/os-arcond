@@ -20,5 +20,4 @@ public class SystemUser extends org.springframework.security.core.userdetails.Us
 	public User getUser() {
 		return user;
 	}
-
 }

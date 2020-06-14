@@ -37,12 +37,13 @@ public class SwaggerConfig {
 		// @formatter:off
 
 		List<ResponseMessage> list = new java.util.ArrayList<>();
+		var resultModelRef = new ModelRef("Result");
+    list.add(new ResponseMessageBuilder()
+					.code(500).message("500 message").responseModel(resultModelRef).build());
 		list.add(new ResponseMessageBuilder()
-					.code(500).message("500 message").responseModel(new ModelRef("Result")).build());
+				.code(401).message("Unauthorized").responseModel(resultModelRef).build());
 		list.add(new ResponseMessageBuilder()
-				.code(401).message("Unauthorized").responseModel(new ModelRef("Result")).build());
-		list.add(new ResponseMessageBuilder()
-				.code(406).message("Not Acceptable").responseModel(new ModelRef("Result")).build());
+				.code(406).message("Not Acceptable").responseModel(resultModelRef).build());
 
 		return new Docket(DocumentationType.SWAGGER_2)
 				.select().apis(RequestHandlerSelectors.any())

@@ -159,7 +159,7 @@ public class ProductServiceTest {
 
     var savedProduct = service.update(product);
 
-    assertThat(savedProduct.getName().equals(product.getName()));
+    assertThat(savedProduct.getName()).isEqualTo(product.getName());
     verify(repository, Mockito.atLeastOnce()).save(product);
   }
 

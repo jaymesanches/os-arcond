@@ -146,7 +146,7 @@ public class ClientServiceTest {
 		
 		var updatedClient = service.update(client);
 		
-		assertThat(updatedClient.getName().equals(client.getName()));
+		assertThat(updatedClient.getName()).isEqualTo(client.getName());
 		verify(repository, Mockito.atLeastOnce()).save(client);
 	}
 	

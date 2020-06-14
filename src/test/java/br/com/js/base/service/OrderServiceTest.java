@@ -164,7 +164,7 @@ public class OrderServiceTest {
 
     var savedOrder = service.update(order);
 
-    assertThat(savedOrder.getNumber().equals(order.getNumber()));
+    assertThat(savedOrder.getNumber()).isEqualTo(order.getNumber());
     verify(repository, Mockito.atLeastOnce()).save(order);
   }
 

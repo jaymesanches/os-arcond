@@ -66,7 +66,7 @@ public class UserServiceTest {
   @Test
   @DisplayName("Deve retornar um usuário pelo id")
   public void Shoul_ReturnUser_When_FindUserById() throws Exception {
-    var<User> optional = Optional.of(UserTestHelper.getUser());
+    var optional = Optional.of(UserTestHelper.getUser());
     when(repository.findById(anyLong())).thenReturn((optional));
 
     var user = service.findById(1l);
@@ -165,7 +165,7 @@ public class UserServiceTest {
 
     var updatedUser = service.update(user);
 
-    assertThat(updatedUser.getName().equals(name));
+    assertThat(updatedUser.getName()).isEqualTo(name);
     verify(repository, Mockito.atLeastOnce()).save(user);
   }
 
