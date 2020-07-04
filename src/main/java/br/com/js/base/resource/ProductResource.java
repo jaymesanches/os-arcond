@@ -42,7 +42,7 @@ public class ProductResource {
 
 	@GetMapping
 	public ResponseEntity<List<ProductDTO>> findByName(
-			@RequestParam(required = false, defaultValue = "%") String name) {
+			@RequestParam(required = false, defaultValue = "") String name) {
 		var products = service.findByNameIgnoreCaseContaining(name);
 		return ResponseEntity.ok(toListDTO(products));
 	}

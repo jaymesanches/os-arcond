@@ -25,6 +25,15 @@ public class ClientRepositoryTest {
 
 	@Autowired
 	ClientRepository repository;
+	
+	@Test
+	@DisplayName("Deve retornar um cliente pelo id")
+	public void Should_returnClient_When_FindById() throws Exception {
+	  var savedClient = repository.save(ClientTestHelper.getClient());
+	  var foundClient = repository.findById(savedClient.getId());
+	  
+	  assertThat(foundClient).isNotNull();
+	}
 
 	@Test
 	@DisplayName("Deve salvar um cliente")
@@ -66,7 +75,7 @@ public class ClientRepositoryTest {
 		var client = ClientTestHelper.getClient();
 		var savedClient = entityManager.persist(client);
 
-		boolean exists = repository.existsByNameIgnoreCaseContaining("Jayme");
+		boolean exists = repository.existsByNameIgnoreCaseContaining(ClientTestHelper.NAME.substring(0,2));
 
 		assertThat(exists).isTrue();
 		assertThat(savedClient.getId()).isNotNull();

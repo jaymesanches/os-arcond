@@ -56,7 +56,7 @@ public class ClientResource {
 
 	@GetMapping
 	public ResponseEntity<List<ClientDTO>> findByName(
-			@RequestParam(required = false, defaultValue = "%") String name) {
+			@RequestParam(required = false, defaultValue = "") String name) {
 		var clients = service.findByNameIgnoreCaseContaining(name);
 		return ResponseEntity.ok(toListDTO(clients));
 	}

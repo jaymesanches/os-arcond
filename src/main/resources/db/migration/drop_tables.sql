@@ -4,6 +4,7 @@ drop table if exists base.os_order_product CASCADE;
 drop table if exists base.os_order CASCADE;
 drop table if exists base.os_work CASCADE;
 drop table if exists base.os_product CASCADE;
+drop table if exists base.os_client_address CASCADE;
 drop table if exists base.os_address CASCADE;
 drop table if exists base.os_user CASCADE;
 drop table if exists base.os_role CASCADE;

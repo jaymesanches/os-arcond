@@ -42,7 +42,7 @@ public class WorkResource {
 
 	@GetMapping
 	public ResponseEntity<List<WorkDTO>> findByName(
-			@RequestParam(required = false, defaultValue = "%") String name) {
+			@RequestParam(required = false, defaultValue = "") String name) {
 		var works = service.findByNameIgnoreCaseContaining(name);
 		return ResponseEntity.ok(toListDTO(works));
 	}

@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.js.base.dto.AddressDTO;
 import br.com.js.base.event.CreatedResourceEvent;
 import br.com.js.base.model.Address;
-import br.com.js.base.repository.AddressRepository;
+import br.com.js.base.service.AddressService;
 
 @RestController
 @RequestMapping("/addresses")
 public class AddressResource {
 
   @Autowired
-  private AddressRepository repository;
+  private AddressService service;
 
   @Autowired
   private ApplicationEventPublisher publisher;
@@ -37,18 +37,18 @@ public class AddressResource {
 
   @GetMapping
   public List<Address> findAll() {
-    return repository.findAll();
+    return service.findAll();
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<Address> findById(@PathVariable Long id) {
-    Optional<Address> optional = repository.findById(id);
+    Optional<Address> optional = service.findById(id);
     return optional.isPresent() ? ResponseEntity.ok(optional.get()) : ResponseEntity.notFound().build();
   }
 
   @PostMapping
   public ResponseEntity<AddressDTO> save(@RequestBody AddressDTO addressDTO, HttpServletResponse response) {
-    Address savedAddress = repository.save(toEntity(addressDTO));
+    Address savedAddress = service.save(toEntity(addressDTO));
     publisher.publishEvent(new CreatedResourceEvent(this, response, savedAddress.getId()));
     return ResponseEntity.status(HttpStatus.CREATED).body(toAddressDTO(savedAddress));
   }

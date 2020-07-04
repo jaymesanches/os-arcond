@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -26,30 +28,31 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Client {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@NotBlank
-	private String name;
+  @NotBlank
+  private String name;
 
-	private String email;
+  private String email;
 
-	private String document;
+  private String document;
 
-	@Column(name = "birth_date")
-	private LocalDate birthDate;
+  @Column(name = "birth_date")
+  private LocalDate birthDate;
 
-	@Column(name = "created_at")
-	@Builder.Default
-	private OffsetDateTime createdAt = OffsetDateTime.now();
+  @Column(name = "created_at")
+  @Builder.Default
+  private OffsetDateTime createdAt = OffsetDateTime.now();
 
-	private String phone;
+  private String phone;
 
-	@OneToMany
-	private List<Address> addresses;
+  @OneToMany
+  @JoinTable(name = "os_client_address", joinColumns = @JoinColumn(name = "id_client"), inverseJoinColumns = @JoinColumn(name = "id_address"))
+  private List<Address> addresses;
 
-	public static int compareByName(Client o1, Client o2) {
-		return o1.name.compareTo(o2.name);
-	}
+  public static int compareByName(Client o1, Client o2) {
+    return o1.name.compareTo(o2.name);
+  }
 }

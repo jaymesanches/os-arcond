@@ -1,5 +1,6 @@
 package br.com.js.base.resource;
 
+import static br.com.js.base.helper.ClientTestHelper.getClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -59,6 +62,9 @@ public class ClientResourceTest extends BaseResourceTest {
   @DisplayName("Deve listar todos os clientes")
   public void Should_ReturnOK_When_FindAllClients() throws Exception {
     // @formatter:off
+    var client = getClient(1L);
+    BDDMockito.given(service.findAll()).willReturn(Arrays.asList(client));
+    
 		var request = 
 			MockMvcRequestBuilders
 			.get(URL_API)

@@ -56,7 +56,7 @@ public class UserResource {
   }
 
   @GetMapping
-  public ResponseEntity<List<UserDTO>> findByName(@RequestParam(required = false, defaultValue = "%") String name) {
+  public ResponseEntity<List<UserDTO>> findByName(@RequestParam(required = false, defaultValue = "") String name) {
     var users = service.findByNameIgnoreCaseContaining(name);
     return ResponseEntity.ok(toListDTO(users));
   }
