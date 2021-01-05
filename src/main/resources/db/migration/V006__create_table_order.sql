@@ -13,6 +13,8 @@ CREATE TABLE os_order (
 	FOREIGN KEY (id_client) REFERENCES os_client(id)
 );
 
+
+/*
 CREATE TABLE os_order_work (
 	id_order BIGINT NOT NULL,
 	id_work BIGINT NOT NULL,
@@ -28,3 +30,4 @@ CREATE TABLE os_order_product (
 	FOREIGN KEY (id_order) REFERENCES os_order(id),
 	FOREIGN KEY (id_product) REFERENCES os_product(id)
 );
+*/

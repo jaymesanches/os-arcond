@@ -14,42 +14,42 @@ import br.com.js.base.repository.ProductRepository;
 @Service
 public class ProductService {
 
-	@Autowired
-	private ProductRepository repository;
+  @Autowired
+  private ProductRepository repository;
+  
+  public List<Product> findAll() {
+    return repository.findAll();
+  }
 
-	public List<Product> findAll() {
-		return repository.findAll();
-	}
+  public Product findById(Long id) {
+    var optional = repository.findById(id);
+    return optional.orElse(null);
+  }
 
-	public Product findById(Long id) {
-		var optional = repository.findById(id);
-		return optional.orElse(null);
-	}
+  public List<Product> findByNameIgnoreCaseContaining(String name) {
+    if (name == null) {
+      throw new BusinessException("Nome precisa ser preenchido");
+    }
 
-	public List<Product> findByNameIgnoreCaseContaining(String name) {
-		if (name == null) {
-			throw new BusinessException("Nome precisa ser preenchido");
-		}
+    return repository.findByNameIgnoreCaseContaining(name);
+  }
 
-		return repository.findByNameIgnoreCaseContaining(name);
-	}
+  public Product save(Product product) {
+    return repository.save(product);
+  }
 
-	public Product save(Product product) {
-		return repository.save(product);
-	}
+  public void delete(Long id) {
+    if (!repository.existsById(id)) {
+      throw new BusinessException("Produto inexistente");
+    }
 
-	public void delete(Long id) {
-		if (!repository.existsById(id)) {
-			throw new BusinessException("Produto inexistente");
-		}
-		
-		repository.deleteById(id);
-	}
+    repository.deleteById(id);
+  }
 
-	public Product update(Product product) {
-		var optional = repository.findById(product.getId());
-		var savedProduct = optional.orElseThrow(() -> new ResourceNotFoundException("Produto não existe"));
-		BeanUtils.copyProperties(product, savedProduct);
-		return repository.save(savedProduct);
-	}
+  public Product update(Product product) {
+    var optional = repository.findById(product.getId());
+    var savedProduct = optional.orElseThrow(() -> new ResourceNotFoundException("Produto não existe"));
+    BeanUtils.copyProperties(product, savedProduct);
+    return repository.save(savedProduct);
+  }
 }

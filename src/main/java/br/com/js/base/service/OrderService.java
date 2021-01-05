@@ -28,6 +28,10 @@ public class OrderService {
 	}
 
 	public Order save(Order os) {
+	  if(os.getOrderItens() == null || os.getOrderItens().isEmpty()) {
+	    throw new BusinessException("Ordem de Serviço sem itens");
+	  }
+	  
 		return repository.save(os);
 	}
 

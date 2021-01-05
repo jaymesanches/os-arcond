@@ -18,7 +18,6 @@ public class WorkTestHelper {
 			.id(id)
 			.name("Troca de Filtro de ar")
 			.sku("100")
-			.discount(BigDecimal.ZERO)
 			.price(BigDecimal.TEN)
 			.build();
 		// @formatter:on

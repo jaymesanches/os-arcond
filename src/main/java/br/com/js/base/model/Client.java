@@ -9,8 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -48,8 +46,7 @@ public class Client {
 
   private String phone;
 
-  @OneToMany
-  @JoinTable(name = "os_client_address", joinColumns = @JoinColumn(name = "id_client"), inverseJoinColumns = @JoinColumn(name = "id_address"))
+  @OneToMany(mappedBy = "client")
   private List<Address> addresses;
 
   public static int compareByName(Client o1, Client o2) {

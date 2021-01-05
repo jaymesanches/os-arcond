@@ -26,5 +26,4 @@ public class Work {
 	private String sku;
 	private String name;
 	private BigDecimal price;
-	private BigDecimal discount;
 }

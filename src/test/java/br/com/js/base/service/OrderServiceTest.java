@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -23,12 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import br.com.js.base.exception.BusinessException;
+import br.com.js.base.helper.OrderItemTestHelper;
 import br.com.js.base.model.Order;
 import br.com.js.base.repository.OrderRepository;
 
@@ -88,13 +89,13 @@ public class OrderServiceTest {
 
     int number = 1;
     int year = 2020;
-    
+
     var savedOrder = service.findByNumberAndYear(number, year);
 
     assertThat(savedOrder.getNumber()).isEqualTo(number);
     assertThat(savedOrder.getYear()).isEqualTo(year);
   }
-  
+
   @Test
   @DisplayName("Deve retornar erro ao pesquisar por número sem número")
   public void Should_ThrowException_When_FindOrdersByNumberWithoutNumber() throws Exception {
@@ -109,6 +110,7 @@ public class OrderServiceTest {
   public void Should_ReturnOrder_When_SaveOrder() {
     // @formatter:off
 		var order = getOrder(1l);
+		order.setOrderItens(Arrays.asList(OrderItemTestHelper.getOrderItem(1l)));
 
 		Mockito.when(repository.save(order)).thenReturn(order);
 
@@ -119,7 +121,18 @@ public class OrderServiceTest {
 		assertThat(savedOrder.getYear()).isEqualTo(YEAR);
 		// @formatter:on
   }
-  
+
+  @Test
+  @DisplayName("Deve retornar erro ao tentar salvar uma ordem de serviço sem item")
+  public void Should_ReturnError_When_SaveOrderWithoutProductOrWork() {
+    var order = getOrder();
+    
+    Throwable exception = Assertions.catchThrowable(() -> service.save(order));
+    
+    assertThat(exception).isInstanceOf(BusinessException.class);
+    verify(repository, never()).save(order);
+  }
+
   @Test
   @DisplayName("Deve remover um produto")
   public void Should_DeleteOrder() throws Exception {
@@ -147,11 +160,9 @@ public class OrderServiceTest {
     var order = getOrder();
     order.setNumber(null);
 
-    when(repository.save(order)).thenThrow(DataIntegrityViolationException.class);
-
     Throwable exception = Assertions.catchThrowable(() -> service.save(order));
 
-    assertThat(exception).isInstanceOf(DataIntegrityViolationException.class);
+    assertThat(exception).isInstanceOf(BusinessException.class);
   }
 
   @Test

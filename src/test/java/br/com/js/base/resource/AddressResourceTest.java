@@ -35,7 +35,7 @@ import br.com.js.base.model.Address;
 import br.com.js.base.service.AddressService;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+//@SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
 public class AddressResourceTest extends BaseResourceTest {

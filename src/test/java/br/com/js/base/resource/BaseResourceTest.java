@@ -5,8 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -19,6 +21,9 @@ public abstract class BaseResourceTest {
 	// Simula as requisições http
 	@Autowired
 	MockMvc mvc;
+	
+	@MockBean
+	private ModelMapper modelMapper;
 	
 	public String obtainAccessToken(String username, String password) throws Exception {
 	  

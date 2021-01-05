@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,7 +53,7 @@ public class ProductResourceTest extends BaseResourceTest {
 
   @MockBean
   ProductService service;
-
+  
   private String accessToken;
 
   @BeforeAll
@@ -61,6 +62,7 @@ public class ProductResourceTest extends BaseResourceTest {
   }
 
   @Test
+  
   @DisplayName("Deve listar todos os produtos")
   public void Should_ReturnOK_When_FindAllProducts() throws Exception {
     // @formatter:off
@@ -112,8 +114,10 @@ public class ProductResourceTest extends BaseResourceTest {
     // @formatter:off
     var product = ProductTestHelper.getProduct(1l);
     var dto = ProductTestHelper.getProductDTO();
+    
+    var modelMapper = new ModelMapper();
 
-    given(service.save(any(Product.class))).willReturn(product);
+    given(service.save(any())).willReturn(product);
 
     var json = toJson(dto);
 
@@ -264,7 +268,7 @@ public class ProductResourceTest extends BaseResourceTest {
 
   private String toJson(ProductDTO dto) throws JsonProcessingException {
     var objectMapper = new ObjectMapper();
-    objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+    objectMapper.setVisibility(PropertyAccessor.ALL, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
   }

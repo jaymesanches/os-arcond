@@ -36,10 +36,10 @@ public class ProductResource {
 
 	@Autowired
 	private ModelMapper modelMapper;
-
-	@Autowired
+	
+	 @Autowired
 	private ProductService service;
-
+	
 	@GetMapping
 	public ResponseEntity<List<ProductDTO>> findByName(
 			@RequestParam(required = false, defaultValue = "") String name) {
@@ -81,7 +81,8 @@ public class ProductResource {
 	}
 
 	private ProductDTO toDTO(Product product) {
-		return modelMapper.map(product, ProductDTO.class);
+		var dto = modelMapper.map(product, ProductDTO.class);
+		return dto;
 	}
 
 	private List<ProductDTO> toListDTO(List<Product> products) {
@@ -89,6 +90,7 @@ public class ProductResource {
 	}
 
 	private Product toEntity(ProductDTO productDTO) {
-		return modelMapper.map(productDTO, Product.class);
+		var product=  modelMapper.map(productDTO, Product.class);
+		return product;
 	}
 }

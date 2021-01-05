@@ -24,7 +24,6 @@ public class OrderTestHelper {
         .number(NUMBER)
         .year(YEAR)
         .client(ClientTestHelper.getClient(1l))
-//        .dateIn(OffsetDateTime.now())
         .price(BigDecimal.TEN)
         .status(StatusOrder.ABERTA)
         .build();

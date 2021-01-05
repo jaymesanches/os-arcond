@@ -24,9 +24,11 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -80,7 +82,7 @@ public class OrderResourceTest extends BaseResourceTest {
     // @formatter:on
   }
   @Test
-  @DisplayName("Deve listar todas as ordens de serviço")
+  @DisplayName("Deve retornar Not Found quando não encontrado ordem de serviço")
   public void Should_ReturnNotFound_When_NotFindAnyOrders() throws Exception {
     // @formatter:off
     BDDMockito.given(service.findAll()).willReturn(null);
@@ -129,8 +131,11 @@ public class OrderResourceTest extends BaseResourceTest {
     // @formatter:off
     var dto = getOrderDTO();
     dto.setClient(null);
-    
     var json = toJson(dto);
+    
+//    doThrow(new MethodArgumentNotValidException(
+//        Mockito.any(MethodParameter.class),
+//        Mockito.any(BindingResult.class))).when(service).save(Mockito.any(Order.class));
 
     var request = 
       MockMvcRequestBuilders

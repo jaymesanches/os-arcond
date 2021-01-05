@@ -13,19 +13,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -38,25 +39,36 @@ import br.com.js.base.dto.ClientDTO;
 import br.com.js.base.helper.AddressTestHelper;
 import br.com.js.base.helper.ClientTestHelper;
 import br.com.js.base.model.Client;
+import br.com.js.base.service.AddressService;
 import br.com.js.base.service.ClientService;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@WebMvcTest(controllers = ClientResource.class)
 @AutoConfigureMockMvc
-@TestInstance(Lifecycle.PER_CLASS)
-public class ClientResourceTest extends BaseResourceTest {
-
+//@TestInstance(Lifecycle.PER_CLASS)
+@WithMockUser
+public class ClientResourceTest { //extends BaseResourceTest {
+  
   private final String URL_API = "/clients";
 
   @MockBean
   private ClientService service;
+  
+  @Autowired
+  MockMvc mvc;
+  
+  @MockBean
+  private ModelMapper modelMapper;
+  
+  @MockBean
+  private AddressService addressService;
 
   private String accessToken;
 
-  @BeforeAll
-  public void setup() throws Exception {
-    accessToken = obtainAccessToken("admin@admin.com", "senhas");
-  }
+//  @BeforeAll
+//  public void setup() throws Exception {
+//    accessToken = obtainAccessToken("admin@admin.com", "senhas");
+//  }
 
   @Test
   @DisplayName("Deve listar todos os clientes")
