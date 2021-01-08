@@ -26,7 +26,7 @@ public class OrderTestHelper {
         .year(YEAR)
         .client(ClientTestHelper.getClient(1l))
         .price(BigDecimal.TEN)
-        .status(StatusOrder.ABERTA)
+        .status(StatusOrder.OPEN)
         .build();
     
     return order;
@@ -46,7 +46,7 @@ public class OrderTestHelper {
         .client(ClientTestHelper.getClientDTO(1l))
 //        .dateIn()
         .price(BigDecimal.TEN)
-        .status(StatusOrder.ABERTA)
+        .status(StatusOrder.OPEN)
         .build();
     
     return dto;

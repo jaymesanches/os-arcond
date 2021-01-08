@@ -1,6 +1,6 @@
 CREATE TABLE os_order_item (
 	id SERIAL PRIMARY KEY,
-	sequencial NUMERIC(4) NOT NULL,
+	sequence NUMERIC(4) NOT NULL,
 	amount NUMERIC(5) NOT NULL,
 	price DECIMAL(10,2) NOT NULL,
 	id_order BIGINT NOT NULL,

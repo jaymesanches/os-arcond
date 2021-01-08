@@ -1,12 +1,9 @@
 package br.com.js.base.dto;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import br.com.js.base.model.StatusOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,20 +15,14 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDTO {
+public class OrderItemDTO {
   private Long id;
-  
-  @NotNull
+  private Integer sequence;
+  private Integer amount;
   private Integer number;
-  @NotNull
   private Integer year;
-  @NotNull
-  private ClientDTO client;
   private BigDecimal price;
-  private BigDecimal discount;
-  private String dateIn;
-  private String dateOut;
-  private String dateEnd;
-  private StatusOrder status;
-  private List<OrderItemDTO> orderItens;
+
+  @NotNull
+  private ProductDTO product;
 }

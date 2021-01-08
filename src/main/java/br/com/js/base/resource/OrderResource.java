@@ -63,10 +63,10 @@ public class OrderResource {
   
   @PostMapping
   public ResponseEntity<OrderDTO> save(@Valid @RequestBody OrderDTO orderDTO, HttpServletResponse response) {
-    var product = toEntity(orderDTO);
-    var savedProduct = service.save(product);
-    publisher.publishEvent(new CreatedResourceEvent(this, response, savedProduct.getId()));
-    return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedProduct));
+    var order = toEntity(orderDTO);
+    var savedOrder = service.save(order);
+    publisher.publishEvent(new CreatedResourceEvent(this, response, savedOrder.getId()));
+    return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedOrder));
   }
   
   @DeleteMapping("{id}")

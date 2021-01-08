@@ -1,5 +1,6 @@
 package br.com.js.base.service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.js.base.exception.BusinessException;
 import br.com.js.base.model.Order;
+import br.com.js.base.model.StatusOrder;
 import br.com.js.base.repository.OrderRepository;
 
 @Service
@@ -31,6 +33,9 @@ public class OrderService {
 	  if(os.getOrderItens() == null || os.getOrderItens().isEmpty()) {
 	    throw new BusinessException("Ordem de Serviço sem itens");
 	  }
+	  
+    os.setDateIn(OffsetDateTime.now());
+    os.setStatus(StatusOrder.OPEN);
 	  
 		return repository.save(os);
 	}

@@ -7,4 +7,4 @@ drop table if exists base.os_address CASCADE;
 drop table if exists base.os_user CASCADE;
 drop table if exists base.os_role CASCADE;
 drop table if exists base.os_client CASCADE;
-drop table if exists flyway_schema_history;
+drop table if exists base.flyway_schema_history;

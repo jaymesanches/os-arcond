@@ -62,7 +62,6 @@ public class ClientResource {
 	@PostMapping
 	public ResponseEntity<Client> save(@Valid @RequestBody ClientDTO clientDTO, HttpServletResponse response) {
 		var client = toEntity(clientDTO);
-//		cliente.setDataCadastro(OffsetDateTime.now());
 		var savedClient = service.save(client);
 		publisher.publishEvent(new CreatedResourceEvent(this, response, savedClient.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedClient);
