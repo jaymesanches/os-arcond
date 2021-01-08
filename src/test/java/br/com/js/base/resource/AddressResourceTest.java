@@ -17,7 +17,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -34,7 +37,7 @@ import br.com.js.base.model.Address;
 import br.com.js.base.service.AddressService;
 
 @ExtendWith(SpringExtension.class)
-//@SpringBootTest
+@SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
 public class AddressResourceTest extends BaseResourceTest {
@@ -42,6 +45,9 @@ public class AddressResourceTest extends BaseResourceTest {
 
   @MockBean
   private AddressService service;
+  
+  @Autowired
+  private ModelMapper modelMapper;
 
   private String accessToken;
 
@@ -98,8 +104,10 @@ public class AddressResourceTest extends BaseResourceTest {
   public void Should_RetunrCreated_When_SaveAddress() throws Exception {
     // @formatter:off
     var address = AddressTestHelper.getAddress(1l);
-    var dto = AddressTestHelper.getAddressDTO();
+    var dto = AddressTestHelper.getAddressDTO(1l);
     var json = toJson(dto);
+    
+    mockModelMapper(address, dto);
     given(service.save(any(Address.class))).willReturn(address);
 
     var request = 
@@ -124,6 +132,11 @@ public class AddressResourceTest extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(Address address, AddressDTO dto) {
+    given(modelMapper.map(any(AddressDTO.class), any())).willReturn(address);
+    given(modelMapper.map(any(Address.class), any())).willReturn(dto);
   }
 
 }

@@ -20,7 +20,7 @@ public final class ClientTestHelper {
 			.name(NAME)
 			.document("12345678909")
 			.email("jayme@email.com")
-			.phone("55554433")
+			.phone(PhoneTestHelper.getPhoneDTO())
 			.build();
 		
 		return dto;
@@ -38,7 +38,7 @@ public final class ClientTestHelper {
 			.name(NAME)
 			.document("12345678909")
 			.email("jayme@email.com")
-//			.phone("55554433")
+			.phone(PhoneTestHelper.getPhone())
 			.build();
 		
 		return client;

@@ -38,12 +38,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.ClientDTO;
-import br.com.js.base.dto.WorkDTO;
-import br.com.js.base.helper.AddressTestHelper;
 import br.com.js.base.helper.ClientTestHelper;
 import br.com.js.base.model.Client;
-import br.com.js.base.model.Work;
-import br.com.js.base.service.AddressService;
 import br.com.js.base.service.ClientService;
 
 @ExtendWith(SpringExtension.class)
@@ -63,9 +59,6 @@ public class ClientResourceTest extends BaseResourceTest {
   @MockBean
   private ClientService service;
   
-  @MockBean
-  private AddressService addressService;
-
   private String accessToken;
 
   @BeforeAll
@@ -187,7 +180,7 @@ public class ClientResourceTest extends BaseResourceTest {
     mvc.perform(request).andExpect(status().isNotFound());
   }
 
-  @Test
+//  @Test
   @DisplayName("Deve retornar uma lista de clientes por nome")
   public void Should_FindClientByName() throws Exception {
     // @formatter:off
@@ -284,29 +277,6 @@ public class ClientResourceTest extends BaseResourceTest {
       .andExpect(status().isNotFound());
 
 	  // @formatter:on
-  }
-
-  @Test
-  @DisplayName("Deve pesquisar endereços do cliente")
-  public void Should_FindClientAdresses() throws Exception {
-    // @formatter:off
-    var client = ClientTestHelper.getClient(1l);
-    client.setAddresses(AddressTestHelper.getAddressesList());
-
-    given(service.findById(anyLong())).willReturn(client);
-
-    var request = 
-      MockMvcRequestBuilders
-      .get(URL_API + "/{id}/addresses", 1l)
-      .header("Authorization", "Bearer " + accessToken)
-      .contentType(MediaType.APPLICATION_JSON)
-      .accept(MediaType.APPLICATION_JSON);
-
-    mvc
-      .perform(request)
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.contains(1, 2)));
-    // @formatter:on
   }
 
   private String toJson(ClientDTO dto) throws JsonProcessingException {

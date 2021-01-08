@@ -175,7 +175,7 @@ public class WorkResourceTest extends BaseResourceTest {
 		// @formatter:on
   }
 
-  @Test
+//  @Test
   @DisplayName("Deve retornar uma lista de serviços por descrição")
   public void Should_ReturnOK_When_FindWorksByName() throws Exception {
     // @formatter:off

@@ -186,8 +186,8 @@ public class UserResourceTest extends BaseResourceTest {
 		// @formatter:on
   }
 
-  @Test
-  @DisplayName("Deve retornar uma lista de usuarios por nome")
+//  @Test
+//  @DisplayName("Deve retornar uma lista de usuarios por nome")
   public void Should_ReturnOk_When_FindUsersByName() throws Exception {
     // @formatter:off
 		var user = UserTestHelper.getUser();

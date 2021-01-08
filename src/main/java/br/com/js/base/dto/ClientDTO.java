@@ -28,8 +28,7 @@ public class ClientDTO {
 	
 	private String document;
 	
-	@NotBlank
-	private String phone;
+	private PhoneDTO phone;
 	
 	private List<AddressDTO> addresses;
 }

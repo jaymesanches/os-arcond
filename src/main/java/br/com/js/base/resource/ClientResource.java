@@ -24,10 +24,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.js.base.dto.ClientDTO;
-import br.com.js.base.dto.AddressDTO;
 import br.com.js.base.event.CreatedResourceEvent;
 import br.com.js.base.model.Client;
-import br.com.js.base.model.Address;
 import br.com.js.base.service.ClientService;
 
 @RestController
@@ -78,12 +76,6 @@ public class ClientResource {
 		return ResponseEntity.ok(dto);
 	}
 
-	@GetMapping("/{idClient}/addresses")
-	public List<AddressDTO> findAddresses(@PathVariable Long idClient){
-		var client = service.findById(idClient);
-		return toAddressesDTO(client.getAddresses());
-	}
-	
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Long id) {
@@ -103,13 +95,5 @@ public class ClientResource {
 
 	private Client toEntity(ClientDTO clientDTO) {
 		return modelMapper.map(clientDTO, Client.class);
-	}
-
-	private List<AddressDTO> toAddressesDTO(List<Address> addresses) {
-		return addresses.stream().map(dto -> toAddressDTO(dto)).collect(Collectors.toList());
-	}
-
-	private AddressDTO toAddressDTO(Address address) {
-		return modelMapper.map(address, AddressDTO.class);
 	}
 }

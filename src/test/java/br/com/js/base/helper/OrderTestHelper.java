@@ -19,6 +19,7 @@ public class OrderTestHelper {
 
   public static Order getOrder(Long id) {
     // @formatter:off
+    
     var order = Order.builder()
         .id(id)
         .number(NUMBER)
