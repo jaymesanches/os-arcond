@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +56,9 @@ public class WorkResourceTest extends BaseResourceTest {
 
   @MockBean
   WorkService service;
+  
+  @Autowired
+  private ModelMapper modelMapper;
 
   private String accessToken;
 
@@ -112,9 +116,10 @@ public class WorkResourceTest extends BaseResourceTest {
   public void Should_ReturnCreated_When_SaveWork() throws Exception {
     // @formatter:off
     var work = WorkTestHelper.getWork(1l);
-    var dto = WorkTestHelper.getWorkDTO();
+    var dto = WorkTestHelper.getWorkDTO(1l);
     var json = toJson(dto);
 
+    mockModelMapper(work, dto);
     given(service.save(Mockito.any(Work.class))).willReturn(work);
 
 		var request = 
@@ -212,7 +217,11 @@ public class WorkResourceTest extends BaseResourceTest {
 		given(service.update(any(Work.class))).willReturn(work);
 
 		var dto = WorkTestHelper.getWorkDTO(1l);
+		dto.setName("Descrição Alterada");
+		
 		var json = toJson(dto);
+		
+		mockModelMapper(work, dto);
 
 		var request = 
 			MockMvcRequestBuilders
@@ -236,6 +245,11 @@ public class WorkResourceTest extends BaseResourceTest {
   public void Should_ReturnOK_When_FindWorkById() throws Exception {
     // @formatter:off
 		var work = WorkTestHelper.getWork(1l);
+		work.setName("Descrição Alterada"); 
+		var dto = WorkTestHelper.getWorkDTO(1l);
+    dto.setName("Descrição Alterada");
+		
+    mockModelMapper(work, dto);
 		given(service.findById(anyLong())).willReturn(work);
 
 		var request = 
@@ -278,5 +292,10 @@ public class WorkResourceTest extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(Work work, WorkDTO dto) {
+    given(modelMapper.map(any(WorkDTO.class), any())).willReturn(work);
+    given(modelMapper.map(any(Work.class), any())).willReturn(dto);
   }
 }

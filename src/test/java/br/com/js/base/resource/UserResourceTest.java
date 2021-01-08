@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,6 +63,9 @@ public class UserResourceTest extends BaseResourceTest {
   @MockBean
   UserService service;
 
+  @Autowired
+  private ModelMapper modelMapper;
+  
   private String accessToken;
 
   @BeforeAll
@@ -122,9 +126,10 @@ public class UserResourceTest extends BaseResourceTest {
   public void Should_ReturnCreated_When_SaveProduct() throws Exception {
     // @formatter:off
     var user = UserTestHelper.getUser(1l);
-    var dto = UserTestHelper.getUserDTO();
+    var dto = UserTestHelper.getUserDTO(1l);
     var json = toJson(dto);
 
+    mockModelMapper(user, dto);
     given(service.save(any(User.class))).willReturn(user);
 
 		var request = 
@@ -221,7 +226,10 @@ public class UserResourceTest extends BaseResourceTest {
     var user = UserTestHelper.getUser(1l);
     user.setName("Nome Alterado");
     var dto = UserTestHelper.getUserDTO(1l);
+    dto.setName("Nome Alterado");
     var json = toJson(dto);
+    
+    mockModelMapper(user, dto);
     
     given(service.update(any(User.class))).willReturn(user);
 
@@ -247,7 +255,9 @@ public class UserResourceTest extends BaseResourceTest {
   public void Should_ReturnOk_When_FindUserById() throws Exception {
     // @formatter:off
     var user = UserTestHelper.getUser(1l);
+    var dto = UserTestHelper.getUserDTO(1l);
     
+    mockModelMapper(user, dto);
     given(service.findById(anyLong())).willReturn(user);
 
     var request = 
@@ -291,6 +301,8 @@ public class UserResourceTest extends BaseResourceTest {
 
     var user = UserTestHelper.getUser(1L);
     var dto = UserTestHelper.getUserDTO(1L);
+    
+    mockModelMapper(user, dto);
 
     BDDMockito.given(service.find(Mockito.any(User.class), Mockito.any(Pageable.class)))
         .willReturn(new PageImpl<User>(Arrays.asList(user), PageRequest.of(0, 100), 1));
@@ -318,5 +330,10 @@ public class UserResourceTest extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(User user, UserDTO dto) {
+    given(modelMapper.map(any(UserDTO.class), any())).willReturn(user);
+    given(modelMapper.map(any(User.class), any())).willReturn(dto);
   }
 }

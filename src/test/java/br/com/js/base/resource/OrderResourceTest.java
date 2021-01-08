@@ -21,14 +21,14 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -51,6 +51,9 @@ public class OrderResourceTest extends BaseResourceTest {
 
   @MockBean
   private OrderService service;
+  
+  @Autowired
+  private ModelMapper modelMapper;
 
   private String accessToken;
 
@@ -108,6 +111,8 @@ public class OrderResourceTest extends BaseResourceTest {
     var order = getOrder(1l);
     var dto = getOrderDTO();
     var json = toJson(dto);
+    
+    mockModelMapper(order, dto);
     
     BDDMockito.given(service.save(Mockito.any(Order.class))).willReturn(order);
     
@@ -200,7 +205,10 @@ public class OrderResourceTest extends BaseResourceTest {
     order.setPrice(BigDecimal.ONE);
     
     var dto = getOrderDTO(1l);
+    dto.setPrice(BigDecimal.ONE);
     var json = toJson(dto);
+    
+    mockModelMapper(order, dto);
     
     given(service.update(any(Order.class))).willReturn(order);
 
@@ -225,7 +233,9 @@ public class OrderResourceTest extends BaseResourceTest {
   public void Should_ReturnOk_When_FindOrderById() throws Exception {
     // @formatter:off
     var order = getOrder(1l);
+    var dto = getOrderDTO(1l);
     
+    mockModelMapper(order, dto);
     given(service.findById(anyLong())).willReturn(order);
 
     var request = 
@@ -268,5 +278,10 @@ public class OrderResourceTest extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(Order order, OrderDTO dto) {
+    given(modelMapper.map(any(OrderDTO.class), any())).willReturn(order);
+    given(modelMapper.map(any(Order.class), any())).willReturn(dto);
   }
 }

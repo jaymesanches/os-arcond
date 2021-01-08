@@ -52,8 +52,11 @@ public class ProductResourceTest extends BaseResourceTest {
   MockMvc mvc;
 
   @MockBean
-  ProductService service;
-  
+  private ProductService service;
+
+  @Autowired
+  private ModelMapper modelMapper;
+
   private String accessToken;
 
   @BeforeAll
@@ -62,7 +65,6 @@ public class ProductResourceTest extends BaseResourceTest {
   }
 
   @Test
-  
   @DisplayName("Deve listar todos os produtos")
   public void Should_ReturnOK_When_FindAllProducts() throws Exception {
     // @formatter:off
@@ -100,8 +102,7 @@ public class ProductResourceTest extends BaseResourceTest {
 		var result = mvc
 			.perform(request)
 			.andExpect(status().isBadRequest())			
-			.andReturn().getResolvedException()
-			;
+			.andReturn().getResolvedException()			;
 		
 		assertThat(result).isInstanceOf(MethodArgumentNotValidException.class);
 		
@@ -113,11 +114,12 @@ public class ProductResourceTest extends BaseResourceTest {
   public void Should_ReturnCreated_When_SaveProduct() throws Exception {
     // @formatter:off
     var product = ProductTestHelper.getProduct(1l);
-    var dto = ProductTestHelper.getProductDTO();
+    var dto = ProductTestHelper.getProductDTO(1l);
+    mockModelMapper(product, dto);
     
-    var modelMapper = new ModelMapper();
-
     given(service.save(any())).willReturn(product);
+    
+    System.out.println(modelMapper);
 
     var json = toJson(dto);
 
@@ -177,9 +179,9 @@ public class ProductResourceTest extends BaseResourceTest {
   public void Should_ReturnOK_When_FindProductsByName() throws Exception {
     // @formatter:off
 
-		var products = ProductTestHelper.getProduct();
+		var product = ProductTestHelper.getProduct();
 		var list = new ArrayList<Product>();
-		list.add(products);
+		list.add(product);
 
 		given(service.findByNameIgnoreCaseContaining(anyString())).willReturn(list);
 
@@ -202,7 +204,10 @@ public class ProductResourceTest extends BaseResourceTest {
     var product = ProductTestHelper.getProduct(1l);
     product.setName("Descrição Alterada");
     var dto = ProductTestHelper.getProductDTO(1l);
+    dto.setName("Descrição Alterada");
     var json = toJson(dto);
+    
+    mockModelMapper(product, dto);
     
     given(service.update(any(Product.class))).willReturn(product);
 
@@ -228,7 +233,9 @@ public class ProductResourceTest extends BaseResourceTest {
   public void Should_ReturnOK_When_FindProductById() throws Exception {
     // @formatter:off
     var product = ProductTestHelper.getProduct(1l);
+    var dto = ProductTestHelper.getProductDTO(1l);
     
+    mockModelMapper(product, dto);
     given(service.findById(anyLong())).willReturn(product);
 
 		var request = 
@@ -271,5 +278,10 @@ public class ProductResourceTest extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.ALL, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(Product product, ProductDTO dto) {
+    given(modelMapper.map(any(ProductDTO.class), any())).willReturn(product);
+    given(modelMapper.map(any(Product.class), any())).willReturn(dto);
   }
 }

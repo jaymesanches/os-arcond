@@ -13,18 +13,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -36,39 +38,40 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.js.base.dto.ClientDTO;
+import br.com.js.base.dto.WorkDTO;
 import br.com.js.base.helper.AddressTestHelper;
 import br.com.js.base.helper.ClientTestHelper;
 import br.com.js.base.model.Client;
+import br.com.js.base.model.Work;
 import br.com.js.base.service.AddressService;
 import br.com.js.base.service.ClientService;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = ClientResource.class)
+@SpringBootTest
 @AutoConfigureMockMvc
-//@TestInstance(Lifecycle.PER_CLASS)
-@WithMockUser
-public class ClientResourceTest { //extends BaseResourceTest {
+@TestInstance(Lifecycle.PER_CLASS)
+public class ClientResourceTest extends BaseResourceTest {
   
   private final String URL_API = "/clients";
 
-  @MockBean
-  private ClientService service;
-  
   @Autowired
   MockMvc mvc;
   
-  @MockBean
+  @Autowired
   private ModelMapper modelMapper;
+  
+  @MockBean
+  private ClientService service;
   
   @MockBean
   private AddressService addressService;
 
   private String accessToken;
 
-//  @BeforeAll
-//  public void setup() throws Exception {
-//    accessToken = obtainAccessToken("admin@admin.com", "senhas");
-//  }
+  @BeforeAll
+  public void setup() throws Exception {
+    accessToken = obtainAccessToken("admin@admin.com", "senhas");
+  }
 
   @Test
   @DisplayName("Deve listar todos os clientes")
@@ -123,9 +126,10 @@ public class ClientResourceTest { //extends BaseResourceTest {
   @DisplayName("Deve criar um novo cliente")
   public void Should_RetunrCreated_When_SaveClient() throws Exception {
     var client = ClientTestHelper.getClient(1l);
-    var dto = ClientTestHelper.getClientDTO();
+    var dto = ClientTestHelper.getClientDTO(1l);
     var json = toJson(dto);
 
+    mockModelMapper(client, dto);
     given(service.save(any(Client.class))).willReturn(client);
 
 
@@ -215,8 +219,10 @@ public class ClientResourceTest { //extends BaseResourceTest {
     client.setName("Nome Alterado");
     
     var dto = ClientTestHelper.getClientDTO(1l);
+    dto.setName("Nome Alterado");
     var json = toJson(dto);
     
+    mockModelMapper(client, dto);
     given(service.update(any(Client.class))).willReturn(client);
 
 		var request = 
@@ -240,7 +246,9 @@ public class ClientResourceTest { //extends BaseResourceTest {
   public void Should_FindClientById() throws Exception {
     // @formatter:off
     var client = ClientTestHelper.getClient(1l);
+    var dto = ClientTestHelper.getClientDTO(1l);
     
+    mockModelMapper(client, dto);
     given(service.findById(anyLong())).willReturn(client);
 
 		var request = 
@@ -306,5 +314,10 @@ public class ClientResourceTest { //extends BaseResourceTest {
     objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
     var json = objectMapper.writeValueAsString(dto);
     return json;
+  }
+  
+  private void mockModelMapper(Client client, ClientDTO dto) {
+    given(modelMapper.map(any(ClientDTO.class), any())).willReturn(client);
+    given(modelMapper.map(any(Client.class), any())).willReturn(dto);
   }
 }

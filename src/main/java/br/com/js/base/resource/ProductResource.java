@@ -31,66 +31,67 @@ import br.com.js.base.service.ProductService;
 @RequestMapping("/products")
 public class ProductResource {
 
-	@Autowired
-	private ApplicationEventPublisher publisher;
+  @Autowired
+  private ApplicationEventPublisher publisher;
 
-	@Autowired
-	private ModelMapper modelMapper;
-	
-	 @Autowired
-	private ProductService service;
-	
-	@GetMapping
-	public ResponseEntity<List<ProductDTO>> findByName(
-			@RequestParam(required = false, defaultValue = "") String name) {
-		var products = service.findByNameIgnoreCaseContaining(name);
-		return ResponseEntity.ok(toListDTO(products));
-	}
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<ProductDTO> findbyId(@PathVariable Long id) {
-		var product = service.findById(id);
+  private ModelMapper modelMapper;
 
-		if (product == null) {
-			return ResponseEntity.notFound().build();
-		} else {
-			return ResponseEntity.ok(toDTO(product));
-		}
-	}
+  private ProductService service;
 
-	@PostMapping
-	public ResponseEntity<ProductDTO> save(@Valid @RequestBody ProductDTO productDTO, HttpServletResponse response) {
-		var product = toEntity(productDTO);
-		var savedProduct = service.save(product);
-		publisher.publishEvent(new CreatedResourceEvent(this, response, savedProduct.getId()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedProduct));
-	}
+  @Autowired
+  public ProductResource(ProductService service, ModelMapper modelMapper) {
+    this.service = service;
+    this.modelMapper = modelMapper;
+  }
 
-	@PutMapping
-	public ResponseEntity<ProductDTO> update(@Valid @RequestBody ProductDTO productDTO, HttpServletResponse response) {
-		var product = toEntity(productDTO);
-		var savedProduct = service.update(product);
-		var dto = toDTO(savedProduct);
-		return ResponseEntity.ok(dto);
-	}
-	
-	@DeleteMapping("/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void delete(@PathVariable Long id) {
-		service.delete(id);
-	}
+  @GetMapping
+  public ResponseEntity<List<ProductDTO>> findByName(@RequestParam(required = false, defaultValue = "") String name) {
+    var products = service.findByNameIgnoreCaseContaining(name);
+    return ResponseEntity.ok(toListDTO(products));
+  }
 
-	private ProductDTO toDTO(Product product) {
-		var dto = modelMapper.map(product, ProductDTO.class);
-		return dto;
-	}
+  @GetMapping("/{id}")
+  public ResponseEntity<ProductDTO> findbyId(@PathVariable Long id) {
+    var product = service.findById(id);
 
-	private List<ProductDTO> toListDTO(List<Product> products) {
-		return products.stream().map(product -> toDTO(product)).collect(Collectors.toList());
-	}
+    if (product == null) {
+      return ResponseEntity.notFound().build();
+    } else {
+      return ResponseEntity.ok(toDTO(product));
+    }
+  }
 
-	private Product toEntity(ProductDTO productDTO) {
-		var product=  modelMapper.map(productDTO, Product.class);
-		return product;
-	}
+  @PostMapping
+  public ResponseEntity<ProductDTO> save(@Valid @RequestBody ProductDTO productDTO, HttpServletResponse response) {
+    var product = toEntity(productDTO);
+    var savedProduct = service.save(product);
+    publisher.publishEvent(new CreatedResourceEvent(this, response, savedProduct.getId()));
+    return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedProduct));
+  }
+
+  @PutMapping
+  public ResponseEntity<ProductDTO> update(@Valid @RequestBody ProductDTO productDTO, HttpServletResponse response) {
+    var product = toEntity(productDTO);
+    var savedProduct = service.update(product);
+    var dto = toDTO(savedProduct);
+    return ResponseEntity.ok(dto);
+  }
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void delete(@PathVariable Long id) {
+    service.delete(id);
+  }
+
+  private ProductDTO toDTO(Product product) {
+    return modelMapper.map(product, ProductDTO.class);
+  }
+
+  private List<ProductDTO> toListDTO(List<Product> products) {
+    return products.stream().map(product -> toDTO(product)).collect(Collectors.toList());
+  }
+
+  private Product toEntity(ProductDTO productDTO) {
+    return modelMapper.map(productDTO, Product.class);
+  }
 }

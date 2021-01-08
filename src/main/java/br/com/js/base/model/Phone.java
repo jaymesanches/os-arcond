@@ -1,13 +1,28 @@
 package br.com.js.base.model;
 
-public class Phone {
-  private Long number;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-  public Long getNumber() {
+import org.springframework.data.annotation.Immutable;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Embeddable
+@Immutable
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor(staticName = "private") // Makes MyValueObject() private.
+public class Phone {
+  @Column(name = "phone")
+  private String number;
+
+  public String getNumber() {
     return number;
   }
 
-  public void setNumber(Long number) {
+  public void setNumber(String number) {
     this.number = number;
   }
 }

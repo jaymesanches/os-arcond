@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,7 +45,8 @@ public class Client {
   @Builder.Default
   private OffsetDateTime createdAt = OffsetDateTime.now();
 
-  private String phone;
+  @EmbeddedId
+  private Phone phone;
 
   @OneToMany(mappedBy = "client")
   private List<Address> addresses;
