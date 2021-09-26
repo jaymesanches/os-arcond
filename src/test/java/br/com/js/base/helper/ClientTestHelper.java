@@ -9,10 +9,10 @@ public final class ClientTestHelper {
 
 	public static final String NAME = "Jayme Sanches";
 
-  public static ClientDTO getClientDTO() {
+	public static ClientDTO getClientDTO() {
 		return getClientDTO(null);
 	}
-	
+
 	public static ClientDTO getClientDTO(Long id) {
 		// @formatter:off
 		var dto = ClientDTO.builder()
@@ -26,11 +26,11 @@ public final class ClientTestHelper {
 		return dto;
 		// @formatter:on
 	}
-	
+
 	public static Client getClient() {
 		return getClient(null);
 	}
-	
+
 	public static Client getClient(Long id) {
 		// @formatter:off
 		var client = Client.builder()
@@ -44,7 +44,7 @@ public final class ClientTestHelper {
 		return client;
 		// @formatter:on
 	}
-	
+
 	public static ArrayList<Client> getClientList() {
 		// @formatter:off
 		var client1 = Client.builder()
